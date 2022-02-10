@@ -2,6 +2,7 @@
 *.iml
 /logs/
 /target/
+/LavalinkServer/bin/
 /LavalinkServer/application.yml
 */dependency-reduced-pom.xml
 .gradle/*
@@ -11,8 +12,10 @@ build/*
 .project
 .classpath
 .settings
+/Testbot/bin/
 /Testbot/build/
 /Testbot/out/
+/plugin-api/bin/
 /plugin-api/build/
 /plugin-api/out/
 gradle.properties
