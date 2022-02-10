@@ -33,10 +33,10 @@ class WebSocketHandler(
         "pause" to ::pause,
         "seek" to ::seek,
         "volume" to ::volume,
-        "equalizer" to ::equalizer,
         "filters" to ::filters,
         "destroy" to ::destroy,
-        "configureResuming" to ::configureResuming
+        "configureResuming" to ::configureResuming,
+        "ping" to ::heartbeat
     ).apply {
         wsExtensions.forEach {
             val func = fun(json: JSONObject) { it.onInvocation(context, json) }
@@ -133,23 +133,6 @@ class WebSocketHandler(
         player.setVolume(json.getInt("volume"))
     }
 
-    private fun equalizer(json: JSONObject) {
-        if (!loggedEqualizerDeprecationWarning) log.warn("The 'equalizer' op has been deprecated in favour of the " +
-                "'filters' op. Please switch to use that one, as this op will get removed in v4.")
-        loggedEqualizerDeprecationWarning = true
-
-        val player = context.getPlayer(json.getString("guildId"))
-
-        val list = mutableListOf<Band>()
-        json.getJSONArray("bands").forEach { b ->
-            val band = b as JSONObject
-            list.add(Band(band.getInt("band"), band.getFloat("gain")))
-        }
-        val filters = player.filters ?: FilterChain()
-        filters.equalizer = list
-        player.filters = filters
-    }
-
     private fun filters(json: JSONObject) {
         val player = context.getPlayer(json.getLong("guildId"))
         player.filters = FilterChain.parse(json, filterExtensions)
@@ -162,5 +145,9 @@ class WebSocketHandler(
     private fun configureResuming(json: JSONObject) {
         context.resumeKey = json.optString("key", null)
         if (json.has("timeout")) context.resumeTimeout = json.getLong("timeout")
+    }
+
+    private fun ping(json: JSONObject) {
+        context.send(JSONObject().put("op", "event").put("event", "Pong"))
     }
 }

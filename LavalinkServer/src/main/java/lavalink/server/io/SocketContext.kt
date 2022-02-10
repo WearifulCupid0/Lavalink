@@ -22,7 +22,10 @@
 
 package lavalink.server.io
 
+import lavalink.server.info.AppInfo
+import lavalink.server.info.GitRepoState
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
+import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary
 import dev.arbjerg.lavalink.api.AudioFilterExtension
 import dev.arbjerg.lavalink.api.ISocketContext
 import dev.arbjerg.lavalink.api.PluginEventHandler
@@ -72,6 +75,7 @@ class SocketContext(
 
     val eventEmitter = EventEmitter(this, eventHandlers)
     val wsHandler = WebSocketHandler(this, webSocketExtensions, filterExtensions)
+    val sessionId = session.id
 
     @Volatile
     var sessionPaused = false
@@ -101,6 +105,15 @@ class SocketContext(
             thread.isDaemon = true
             thread
         }
+
+        sendMessage(
+            JSONObject()
+            .put("op", "event")
+            .put("event", "WebsocketConnectionData")
+            .put("heartbeat", 10000)
+            .put("sessionId", sessionId)
+            .put("info", info())
+        )
     }
 
     fun getPlayer(guildId: String) = getPlayer(guildId.toLong())
@@ -113,6 +126,12 @@ class SocketContext(
 
     override fun getPlayers(): Map<Long, Player> {
         return players.toMap()
+    }
+
+    fun getExistingPlayer(guildId: String) = getExistingPlayer(guildId.toLong())
+
+    fun getExistingPlayer(guildId: Long): Player? {
+        return players.get(guildId)
     }
 
     /**
@@ -184,6 +203,29 @@ class SocketContext(
                     log.error("Error", throwable)
                 }
             })
+    }
+
+    private fun info(): JSONObject {
+        val json = JSONObject()
+        val appInfo = AppInfo()
+
+        json
+        .put("version", appInfo.version.takeUnless { it.startsWith("@") } ?: "Unknown")
+        .put("build", appInfo.buildNumber.takeUnless { it.startsWith("@") } ?: "Unofficial")
+        .put("java", System.getProperty("java.version"))
+        .put("lavaplayer", PlayerLibrary.VERSION)
+
+
+        val gitRepoState = GitRepoState()
+        if (gitRepoState.isLoaded) {
+            json
+            .put("buildTime", appInfo.buildTime)
+            .put("commitTime", gitRepoState.commitTime * 1000)
+            .put("commit", gitRepoState.commitIdAbbrev)
+            .put("branch", gitRepoState.branch)
+        }
+
+        return json
     }
 
     /**

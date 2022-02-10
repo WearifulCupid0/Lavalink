@@ -73,8 +73,7 @@ public class StatsTask implements Runnable {
         });
 
         out.put("op", "stats");
-        out.put("players", playersTotal[0]);
-        out.put("playingPlayers", playersPlaying[0]);
+        out.put("players", new JSONObject().put("playing", playersPlaying[0]).put("total", playersTotal[0]));
         out.put("uptime", System.currentTimeMillis() - Launcher.INSTANCE.getStartTime());
 
         // In bytes

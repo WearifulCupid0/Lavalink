@@ -61,8 +61,7 @@ class AudioPlayerConfiguration {
         }
 
         if (sources.isYoutube) {
-            val youtubeConfig = serverConfig.youtubeConfig
-            val youtube = YoutubeAudioSourceManager(serverConfig.isYoutubeSearchEnabled, youtubeConfig?.email ?: null, youtubeConfig?.password ?: null)
+            val youtube = YoutubeAudioSourceManager(serverConfig.isYoutubeSearchEnabled, serverConfig.youtubeConfig?.email, serverConfig.youtubeConfig?.password)
 
             if (routePlanner != null) {
                 val retryLimit = serverConfig.ratelimit?.retryLimit ?: -1
