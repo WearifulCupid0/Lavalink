@@ -4,7 +4,6 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager
-import com.sedmelluq.discord.lavaplayer.source.beam.BeamAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.local.LocalAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.*
@@ -62,7 +61,9 @@ class AudioPlayerConfiguration {
         }
 
         if (sources.isYoutube) {
-            val youtube = YoutubeAudioSourceManager(serverConfig.isYoutubeSearchEnabled)
+            val youtubeConfig = serverConfig.youtubeConfig
+            val youtube = YoutubeAudioSourceManager(serverConfig.isYoutubeSearchEnabled, youtubeConfig?.email ?: null, youtubeConfig?.password ?: null)
+
             if (routePlanner != null) {
                 val retryLimit = serverConfig.ratelimit?.retryLimit ?: -1
                 when {
@@ -72,20 +73,6 @@ class AudioPlayerConfiguration {
                     else -> YoutubeIpRotatorSetup(routePlanner).forSource(youtube).withRetryLimit(retryLimit).setup()
 
                 }
-            }
-            val playlistLoadLimit = serverConfig.youtubePlaylistLoadLimit
-            if (playlistLoadLimit != null) youtube.setPlaylistPageCount(playlistLoadLimit)
-
-            val youtubeConfig = serverConfig.youtubeConfig
-            if (youtubeConfig != null) {
-                if (youtubeConfig.PAPISID.isNotBlank() && youtubeConfig.PSID.isNotBlank()) {
-                    YoutubeHttpContextFilter.setPAPISID(youtubeConfig.PAPISID)
-                    YoutubeHttpContextFilter.setPSID(youtubeConfig.PSID)
-                } else {
-                    log.info("PAPISID and PSID fields are blank, age restricted videos will throw exceptions")
-                }
-            } else {
-                log.debug("Youtube config block is not found")
             }
 
             audioPlayerManager.registerSourceManager(youtube)
@@ -108,7 +95,6 @@ class AudioPlayerConfiguration {
         if (sources.isBandcamp) audioPlayerManager.registerSourceManager(BandcampAudioSourceManager())
         if (sources.isTwitch) audioPlayerManager.registerSourceManager(TwitchStreamAudioSourceManager())
         if (sources.isVimeo) audioPlayerManager.registerSourceManager(VimeoAudioSourceManager())
-        if (sources.isMixer) audioPlayerManager.registerSourceManager(BeamAudioSourceManager())
         if (sources.isLocal) audioPlayerManager.registerSourceManager(LocalAudioSourceManager())
 
         audioSourceManagers.forEach {
