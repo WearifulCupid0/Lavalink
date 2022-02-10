@@ -59,7 +59,7 @@ class PlayerFunHandlers(private val context: SocketContext) {
         player.play(track)
 
         val conn = context.getVoiceConnection(player)
-        context.getPlayer(json.getString("guildId")).provideTo(conn)
+        context.getPlayer(player.getGuildId()).provideTo(conn)
     }
 
     public fun update(json: JSONObject, player: Player) {
