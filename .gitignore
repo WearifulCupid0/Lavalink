@@ -2,6 +2,7 @@
 *.iml
 /logs/
 /target/
+bin/
 /LavalinkServer/bin/
 /LavalinkServer/application.yml
 */dependency-reduced-pom.xml
