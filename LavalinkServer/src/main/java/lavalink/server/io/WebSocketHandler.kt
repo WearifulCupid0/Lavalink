@@ -23,11 +23,9 @@ class WebSocketHandler(
         private val log: Logger = LoggerFactory.getLogger(WebSocketHandler::class.java)
     }
 
-    private var loggedVolumeDeprecationWarning = false
-    private var loggedEqualizerDeprecationWarning = false
-
     private val handlers: Map<String, (JSONObject) -> Unit> = mutableMapOf(
         "voiceUpdate" to ::voiceUpdate,
+        "update" to ::update,
         "play" to ::play,
         "stop" to ::stop,
         "pause" to ::pause,
@@ -36,7 +34,7 @@ class WebSocketHandler(
         "filters" to ::filters,
         "destroy" to ::destroy,
         "configureResuming" to ::configureResuming,
-        "ping" to ::heartbeat
+        "ping" to ::ping
     ).apply {
         wsExtensions.forEach {
             val func = fun(json: JSONObject) { it.onInvocation(context, json) }
@@ -51,64 +49,18 @@ class WebSocketHandler(
     }
 
     private fun voiceUpdate(json: JSONObject) {
-        val sessionId = json.getString("sessionId")
-        val guildId = json.getLong("guildId")
-
-        val event = json.getJSONObject("event")
-        val endpoint: String? = event.optString("endpoint")
-        val token: String = event.getString("token")
-
-        //discord sometimes send a partial server update missing the endpoint, which can be ignored.
-        endpoint ?: return
-        //clear old connection
-        context.koe.destroyConnection(guildId)
-
-        val player = context.getPlayer(guildId)
-        val conn = context.getVoiceConnection(player)
-        conn.connect(VoiceServerInfo(sessionId, endpoint, token)).whenComplete { _, _ ->
-            player.provideTo(conn)
-        }
+        val player = context.getPlayer(json.getString("guildId"))
+        context.playerHandler.voiceUpdate(json, player)
+    }
+    
+    private fun update(json: JSONObject) {
+        val player = context.getPlayer(json.getString("guildId"))
+        context.playerHandler.update(json, player)
     }
 
     private fun play(json: JSONObject) {
         val player = context.getPlayer(json.getString("guildId"))
-        val noReplace = json.optBoolean("noReplace", false)
-
-        if (noReplace && player.playingTrack != null) {
-            log.info("Skipping play request because of noReplace")
-            return
-        }
-
-        val track = Util.toAudioTrack(context.audioPlayerManager, json.getString("track"))
-
-        if (json.has("startTime")) {
-            track.position = json.getLong("startTime")
-        }
-
-        player.setPause(json.optBoolean("pause", false))
-        if (json.has("volume")) {
-            if(!loggedVolumeDeprecationWarning) log.warn("The volume property in the play operation has been deprecated" +
-                    "and will be removed in v4. Please configure a filter instead. Note that the new filter takes a " +
-                    "float value with 1.0 being 100%")
-            loggedVolumeDeprecationWarning = true
-            val filters = player.filters ?: FilterChain()
-            filters.volume = json.getFloat("volume") / 100
-            player.filters = filters
-        }
-
-        if (json.has("endTime")) {
-            val stopTime = json.getLong("endTime")
-            if (stopTime > 0) {
-                val handler = TrackEndMarkerHandler(player)
-                val marker = TrackMarker(stopTime, handler)
-                track.setMarker(marker)
-            }
-        }
-
-        player.play(track)
-
-        val conn = context.getVoiceConnection(player)
-        context.getPlayer(json.getString("guildId")).provideTo(conn)
+        context.playerHandler.play(json, player)
     }
 
     private fun stop(json: JSONObject) {

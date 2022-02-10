@@ -1,5 +1,6 @@
 package lavalink.server.config;
 
+import lavalink.server.io.SocketServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +9,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.net.URI;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -15,17 +18,20 @@ import javax.servlet.http.HttpServletResponse;
 public class RequestAuthorizationFilter implements HandlerInterceptor, WebMvcConfigurer {
 
     private static final Logger log = LoggerFactory.getLogger(RequestAuthorizationFilter.class);
+    private SocketServer socketServer;
     private ServerConfig serverConfig;
     private MetricsPrometheusConfigProperties metricsConfig;
 
-    public RequestAuthorizationFilter(ServerConfig serverConfig, MetricsPrometheusConfigProperties metricsConfig) {
+    public RequestAuthorizationFilter(ServerConfig serverConfig, SocketServer socketServer, MetricsPrometheusConfigProperties metricsConfig) {
         this.serverConfig = serverConfig;
+        this.socketServer = socketServer;
         this.metricsConfig = metricsConfig;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         // Collecting metrics is anonymous
+        
         if (!metricsConfig.getEndpoint().isEmpty()
                 && request.getServletPath().equals(metricsConfig.getEndpoint())) return true;
 
@@ -46,6 +52,24 @@ public class RequestAuthorizationFilter implements HandlerInterceptor, WebMvcCon
             log.warn("Authorization failed for {} on {} {}", ip, method, path);
             response.setStatus(HttpStatus.FORBIDDEN.value());
             return false;
+        }
+
+        if (request.getServletPath().startsWith("/players")) {
+            String sessionId = request.getHeader("Session-Id");
+            if (sessionId == null || socketServer.getExistingContext(sessionId) == null) {
+                String method = request.getMethod();
+                String path = request.getRequestURI().substring(request.getContextPath().length());
+                String ip = request.getRemoteAddr();
+
+                if (authorization == null) {
+                    log.warn("Session id missing for {} on {} {}", ip, method, path);
+                    response.setStatus(HttpStatus.BAD_REQUEST.value());
+                    return false;
+                }
+                log.warn("Session id failed for {} on {} {}", ip, method, path);
+                response.setStatus(HttpStatus.BAD_REQUEST.value());
+                return false;
+            }
         }
 
         return true;

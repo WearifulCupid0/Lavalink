@@ -144,6 +144,10 @@ class SocketServer(
         context.shutdown()
     }
 
+    fun getExistingContext(id: String): SocketContext? {
+        return contextMap.get(id)
+    }
+
     override fun handleTextMessage(session: WebSocketSession?, message: TextMessage?) {
         try {
             handleTextMessageSafe(session!!, message!!)

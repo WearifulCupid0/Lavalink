@@ -62,7 +62,7 @@ class SocketContext(
     val koe: KoeClient,
     eventHandlers: Collection<PluginEventHandler>,
     webSocketExtensions: List<WebSocketExtension>,
-    filterExtensions: List<AudioFilterExtension>
+    val filterExtensions: List<AudioFilterExtension>
 
 ) : ISocketContext {
 
@@ -75,7 +75,7 @@ class SocketContext(
 
     val eventEmitter = EventEmitter(this, eventHandlers)
     val wsHandler = WebSocketHandler(this, webSocketExtensions, filterExtensions)
-    val sessionId = session.id
+    val playerHandler = PlayerFunHandlers(this)
 
     @Volatile
     var sessionPaused = false
@@ -110,8 +110,7 @@ class SocketContext(
             JSONObject()
             .put("op", "event")
             .put("event", "WebsocketConnectionData")
-            .put("heartbeat", 10000)
-            .put("sessionId", sessionId)
+            .put("sessionId", session.id)
             .put("info", info())
         )
     }
@@ -150,7 +149,7 @@ class SocketContext(
     /**
      * Disposes of a voice connection
      */
-    override fun destroyPlayer(guild: Long) {
+    public override fun destroyPlayer(guild: Long) {
         val player = players.remove(guild)
         if (player != null) {
             eventEmitter.onDestroyPlayer(player)
