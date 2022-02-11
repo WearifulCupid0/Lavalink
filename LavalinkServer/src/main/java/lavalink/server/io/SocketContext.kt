@@ -39,6 +39,7 @@ import lavalink.server.player.Player
 import moe.kyokobot.koe.KoeClient
 import moe.kyokobot.koe.KoeEventAdapter
 import moe.kyokobot.koe.VoiceConnection
+import moe.kyokobot.koe.internal.json.JsonObject
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import org.springframework.web.socket.CloseStatus
@@ -109,7 +110,7 @@ class SocketContext(
         sendMessage(
             JSONObject()
             .put("op", "event")
-            .put("event", "WebsocketConnectionData")
+            .put("event", "WebsocketConnectionDataEvent")
             .put("sessionId", session.id)
             .put("info", info())
         )
@@ -272,7 +273,7 @@ class SocketContext(
         override fun gatewayClosed(code: Int, reason: String?, byRemote: Boolean) {
             val out = JSONObject()
             out.put("op", "event")
-            out.put("type", "WebSocketClosedEvent")
+            out.put("type", "VoiceConnectionClosed")
             out.put("guildId", player.guildId.toString())
             out.put("reason", reason ?: "")
             out.put("code", code)
@@ -284,7 +285,61 @@ class SocketContext(
         }
 
         override fun gatewayReady(target: InetSocketAddress?, ssrc: Int) {
+            val out = JSONObject()
+            out.put("op", "event")
+            out.put("type", "VoiceConnectionReady")
+            out.put("guildId", player.guildId.toString())
+            out.put("ssrc", ssrc)
+            
+            if (target != null) {
+                out.put("address", target.getAddress().toString() ?: "")
+            }
+
+            send(out)
+
             SocketServer.sendPlayerUpdate(this@SocketContext, player)
+        }
+
+        override fun userConnected(id: String, audioSSRC: Int, videoSSRC: Int) {
+            val out = JSONObject()
+            out.put("op", "event")
+            out.put("type", "VoiceUserConnected")
+            out.put("guildId", player.guildId.toString())
+            out.put("userId", id)
+            out.put("audioSSRC", audioSSRC)
+            out.put("videoSSRC", videoSSRC)
+
+            send(out)
+        }
+
+        override fun userDisconnected(id: String) {
+            val out = JSONObject()
+            out.put("op", "event")
+            out.put("type", "VoiceUserDisconnected")
+            out.put("guildId", player.guildId.toString())
+            out.put("userId", id)
+
+            send(out)
+        }
+
+        override fun externalIPDiscovered(target: InetSocketAddress) {
+            val out = JSONObject()
+            out.put("op", "event")
+            out.put("type", "VoiceExternalIPDiscovered")
+            out.put("guildId", player.guildId.toString())
+            out.put("address", target.getAddress().toString())
+            
+            send(out)
+        }
+
+        override fun sessionDescription(session: JsonObject) {
+            val out = JSONObject()
+            out.put("op", "event")
+            out.put("type", "VoiceSessionDescription")
+            out.put("guildId", player.guildId.toString())
+            out.put("session", JSONObject(session.toString()))
+
+            send(out)
         }
     }
 }

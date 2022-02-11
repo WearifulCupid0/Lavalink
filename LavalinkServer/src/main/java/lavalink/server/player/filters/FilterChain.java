@@ -52,7 +52,7 @@ public class FilterChain {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends FilterChain> T config(Class<T> clazz) {
+    public <T extends FilterChain> T getConfig(Class<T> clazz) {
         return (T) filters.get(clazz);
     }
 
