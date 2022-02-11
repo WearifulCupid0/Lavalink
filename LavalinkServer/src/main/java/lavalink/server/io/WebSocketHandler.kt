@@ -4,7 +4,6 @@ import com.sedmelluq.discord.lavaplayer.track.TrackMarker
 import dev.arbjerg.lavalink.api.AudioFilterExtension
 import dev.arbjerg.lavalink.api.WebSocketExtension
 import lavalink.server.player.TrackEndMarkerHandler
-import lavalink.server.player.filters.Band
 import lavalink.server.player.filters.FilterChain
 import lavalink.server.util.Util
 import moe.kyokobot.koe.VoiceServerInfo
@@ -63,6 +62,11 @@ class WebSocketHandler(
         context.playerHandler.play(json, player)
     }
 
+    private fun filters(json: JSONObject) {
+        val player = context.getPlayer(json.getLong("guildId"))
+        FilterChain.setFiltersFromJSON(json, player.getFilterChain())
+    }
+
     private fun stop(json: JSONObject) {
         val player = context.getPlayer(json.getString("guildId"))
         player.stop()
@@ -83,11 +87,6 @@ class WebSocketHandler(
     private fun volume(json: JSONObject) {
         val player = context.getPlayer(json.getString("guildId"))
         player.setVolume(json.getInt("volume"))
-    }
-
-    private fun filters(json: JSONObject) {
-        val player = context.getPlayer(json.getLong("guildId"))
-        player.filters = FilterChain.parse(json, filterExtensions)
     }
 
     private fun destroy(json: JSONObject) {

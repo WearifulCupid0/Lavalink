@@ -48,6 +48,22 @@ public class EventEmitter extends AudioEventAdapter {
     }
 
     @Override
+    public void onPlayerResume(AudioPlayer player) {
+        linkPlayer.getSocket().send(new JSONObject()
+        .put("op", "event")
+        .put("type", "PlayerResumeEvent")
+        .put("guildId", String.valueOf(linkPlayer.getGuildId())));
+    }
+
+    @Override
+    public void onPlayerPause(AudioPlayer player) {
+        linkPlayer.getSocket().send(new JSONObject()
+        .put("op", "event")
+        .put("type", "PlayerPauseEvent")
+        .put("guildId", String.valueOf(linkPlayer.getGuildId())));
+    }
+
+    @Override
     public void onTrackStart(AudioPlayer player, AudioTrack track) {
         JSONObject out = new JSONObject();
         out.put("op", "event");

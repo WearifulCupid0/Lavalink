@@ -18,12 +18,12 @@ import org.json.JSONObject
 class PlayersRestHandler(private val server: SocketServer) {
 
     @GetMapping("/players/{guildId}")
-    fun getPlayer(request: HttpServletRequest, @PathVariable("guildId") guildId: String): ResponseEntity<JSONObject> {
+    fun getPlayer(request: HttpServletRequest, @PathVariable("guildId") guildId: String): ResponseEntity<String> {
         val context = getExistingContext(request.getHeader("Session-Id"))
         if (context == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         val player = getExistingPlayer(guildId, context)
         if (player == null) return ResponseEntity(HttpStatus.NOT_FOUND)
-        return ResponseEntity.ok(player.getState())
+        return ResponseEntity.ok(player.getState().toString())
     }
 
     @DeleteMapping("/players/{guildId}")
@@ -37,24 +37,24 @@ class PlayersRestHandler(private val server: SocketServer) {
     }
 
     @PostMapping("/players/{guildId}")
-    fun createPlayer(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<JSONObject> {
+    fun createPlayer(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<String> {
         val context = server.getExistingContext(request.getHeader("Session-Id"))
         if (context == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         val player = getOrCreatePlayer(guildId, context)
         if (player == null) return ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)
         if (body.isNotBlank()) context.playerHandler.update(JSONObject(body), player)
-        return ResponseEntity.ok(player.getState())
+        return ResponseEntity.ok(player.getState().toString())
     }
 
     @PatchMapping("/players/{guildId}")
-    fun playerEdit(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<JSONObject> {
+    fun playerEdit(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<String> {
         val context = getExistingContext(request.getHeader("Session-Id"))
         if (context == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         val player = getExistingPlayer(guildId, context)
         if (player == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         if (body.isBlank()) return ResponseEntity(HttpStatus.BAD_REQUEST)
         context.playerHandler.update(JSONObject(body), player)
-        return ResponseEntity.ok(player.getState())
+        return ResponseEntity.ok(player.getState().toString())
     }
 
     @PostMapping("/players/{guildId}/voice")
@@ -69,68 +69,68 @@ class PlayersRestHandler(private val server: SocketServer) {
     }
 
     @PostMapping("/players/{guildId}/play")
-    fun playerPlay(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<JSONObject> {
+    fun playerPlay(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<String> {
         val context = getExistingContext(request.getHeader("Session-Id"))
         if (context == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         val player = getExistingPlayer(guildId, context)
         if (player == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         if (body.isBlank()) return ResponseEntity(HttpStatus.BAD_REQUEST)
         context.playerHandler.play(JSONObject(body), player)
-        return ResponseEntity.ok(player.getState())
+        return ResponseEntity.ok(player.getState().toString())
     }
 
     @PostMapping("/players/{guildId}/stop")
-    fun playerStop(request: HttpServletRequest, @PathVariable("guildId") guildId: String): ResponseEntity<JSONObject> {
+    fun playerStop(request: HttpServletRequest, @PathVariable("guildId") guildId: String): ResponseEntity<String> {
         val context = getExistingContext(request.getHeader("Session-Id"))
         if (context == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         val player = getExistingPlayer(guildId, context)
         if (player == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         player.stop()
-        return ResponseEntity.ok(player.getState())
+        return ResponseEntity.ok(player.getState().toString())
     }
 
     @PatchMapping("/players/{guildId}/filters")
-    fun playerFilters(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<JSONObject> {
+    fun playerFilters(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<String> {
         val context = getExistingContext(request.getHeader("Session-Id"))
         if (context == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         val player = getExistingPlayer(guildId, context)
         if (player == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         if (body.isBlank()) return ResponseEntity(HttpStatus.BAD_REQUEST)
-        player.filters = FilterChain.parse(JSONObject(body), context.filterExtensions)
-        return ResponseEntity.ok(player.getState())
+        FilterChain.setFiltersFromJSON(JSONObject(body), player.getFilterChain())
+        return ResponseEntity.ok(player.getState().toString())
     }
 
     @PatchMapping("/players/{guildId}/pause")
-    fun playerPause(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<JSONObject> {
+    fun playerPause(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<String> {
         val context = getExistingContext(request.getHeader("Session-Id"))
         if (context == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         val player = getExistingPlayer(guildId, context)
         if (player == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         if (body.isBlank()) return ResponseEntity(HttpStatus.BAD_REQUEST)
         player.setPause(JSONObject(body).getBoolean("pause"))
-        return ResponseEntity.ok(player.getState())
+        return ResponseEntity.ok(player.getState().toString())
     }
 
     @PatchMapping("/players/{guildId}/seek")
-    fun playerSeek(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<JSONObject> {
+    fun playerSeek(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<String> {
         val context = getExistingContext(request.getHeader("Session-Id"))
         if (context == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         val player = getExistingPlayer(guildId, context)
         if (player == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         if (body.isBlank()) return ResponseEntity(HttpStatus.BAD_REQUEST)
         player.seekTo(JSONObject(body).getLong("position"))
-        return ResponseEntity.ok(player.getState())
+        return ResponseEntity.ok(player.getState().toString())
     }
 
     @PatchMapping("/players/{guildId}/volume")
-    fun playerVolume(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<JSONObject> {
+    fun playerVolume(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<String> {
         val context = getExistingContext(request.getHeader("Session-Id"))
         if (context == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         val player = getExistingPlayer(guildId, context)
         if (player == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         if (body.isBlank()) return ResponseEntity(HttpStatus.BAD_REQUEST)
         player.setVolume(JSONObject(body).getInt("volume"))
-        return ResponseEntity.ok(player.getState())
+        return ResponseEntity.ok(player.getState().toString())
     }
 
     private fun getOrCreatePlayer(guildId: String, context: SocketContext?): Player? {

@@ -5,7 +5,6 @@ import dev.arbjerg.lavalink.api.AudioFilterExtension
 import dev.arbjerg.lavalink.api.WebSocketExtension
 import lavalink.server.player.Player
 import lavalink.server.player.TrackEndMarkerHandler
-import lavalink.server.player.filters.Band
 import lavalink.server.player.filters.FilterChain
 import lavalink.server.util.Util
 import moe.kyokobot.koe.VoiceServerInfo
@@ -18,9 +17,6 @@ class PlayerFunHandlers(private val context: SocketContext) {
     companion object {
         private val log: Logger = LoggerFactory.getLogger(PlayerFunHandlers::class.java)
     }
-
-    private var loggedVolumeDeprecationWarning = false
-    private var loggedEqualizerDeprecationWarning = false
 
     public fun play(json: JSONObject, player: Player) {
         val noReplace = json.optBoolean("noReplace", false)
@@ -37,15 +33,6 @@ class PlayerFunHandlers(private val context: SocketContext) {
         }
 
         player.setPause(json.optBoolean("pause", false))
-        if (json.has("volume")) {
-            if(!loggedVolumeDeprecationWarning) log.warn("The volume property in the play operation has been deprecated" +
-                    "and will be removed in v4. Please configure a filter instead. Note that the new filter takes a " +
-                    "float value with 1.0 being 100%")
-            loggedVolumeDeprecationWarning = true
-            val filters = player.filters ?: FilterChain()
-            filters.volume = json.getFloat("volume") / 100
-            player.filters = filters
-        }
 
         if (json.has("endTime")) {
             val stopTime = json.getLong("endTime")
@@ -65,7 +52,7 @@ class PlayerFunHandlers(private val context: SocketContext) {
     public fun update(json: JSONObject, player: Player) {
         if (json.has("volume")) player.setVolume(json.getInt("volume"))
         if (json.has("position")) player.seekTo(json.getLong("position"))
-        if (json.has("filters")) player.filters = FilterChain.parse(json.getJSONObject("filters"), context.filterExtensions)
+        if (json.has("filters")) FilterChain.setFiltersFromJSON(json.getJSONObject("filters"), player.getFilterChain())
         if (json.has("pause")) player.setPause(json.getBoolean("pause"))
         if (json.has("play")) play(json.getJSONObject("play"), player)
         if (json.has("voice")) voiceUpdate(json.getJSONObject("voice"), player)

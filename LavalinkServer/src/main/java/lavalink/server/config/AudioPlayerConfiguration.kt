@@ -1,16 +1,37 @@
 package lavalink.server.config
 
+import com.sedmelluq.lavaplayer.extensions.thirdpartysources.applemusic.AppleMusicAudioSourceManager
+import com.sedmelluq.lavaplayer.extensions.thirdpartysources.deezer.DeezerAudioSourceManager
+import com.sedmelluq.lavaplayer.extensions.thirdpartysources.napster.NapsterAudioSourceManager
+import com.sedmelluq.lavaplayer.extensions.thirdpartysources.spotify.SpotifyAudioSourceManager
+import com.sedmelluq.lavaplayer.extensions.thirdpartysources.tidal.TidalAudioSourceManager
+import com.sedmelluq.lavaplayer.extensions.thirdpartysources.yamusic.YandexMusicAudioSourceManager
+import com.sedmelluq.lavaplayer.extensions.thirdpartysources.yamusic.YandexHttpContextFilter
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.bandlab.BandlabAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.bilibili.BilibiliAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.clyp.ClypAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.getyarn.GetyarnAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.iheart.iHeartAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.instagram.InstagramAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.mixcloud.MixcloudAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.jamendo.JamendoAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.newgrounds.NewgroundsAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.ocremix.OcremixAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.odysee.OdyseeAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.reddit.RedditAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.local.LocalAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.*
+import com.sedmelluq.discord.lavaplayer.source.streamable.StreamableAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.tiktok.TiktokAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.tunein.TuneinAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeHttpContextFilter
 import com.sedmelluq.lava.extensions.youtuberotator.YoutubeIpRotatorSetup
 import com.sedmelluq.lava.extensions.youtuberotator.planner.*
 import com.sedmelluq.lava.extensions.youtuberotator.tools.ip.Ipv4Block
@@ -38,6 +59,7 @@ class AudioPlayerConfiguration {
     @Bean
     fun audioPlayerManagerSupplier(
         sources: AudioSourcesConfig,
+        search: AudioSearchConfig,
         serverConfig: ServerConfig,
         routePlanner: AbstractRoutePlanner?,
         audioSourceManagers: Collection<AudioSourceManager>,
@@ -61,7 +83,7 @@ class AudioPlayerConfiguration {
         }
 
         if (sources.isYoutube) {
-            val youtube = YoutubeAudioSourceManager(serverConfig.isYoutubeSearchEnabled, serverConfig.youtubeConfig?.email, serverConfig.youtubeConfig?.password)
+            val youtube = YoutubeAudioSourceManager(search.isYoutube, serverConfig.youtubeConfig?.email, serverConfig.youtubeConfig?.password)
 
             if (routePlanner != null) {
                 val retryLimit = serverConfig.ratelimit?.retryLimit ?: -1
@@ -83,7 +105,7 @@ class AudioPlayerConfiguration {
 
             audioPlayerManager.registerSourceManager(
                 SoundCloudAudioSourceManager(
-                    serverConfig.isSoundcloudSearchEnabled,
+                    search.isSoundcloud,
                     dataReader,
                     dataLoader,
                     formatHandler,
@@ -92,9 +114,30 @@ class AudioPlayerConfiguration {
             )
         }
         if (sources.isBandcamp) audioPlayerManager.registerSourceManager(BandcampAudioSourceManager())
+        if (sources.isBandlab) audioPlayerManager.registerSourceManager(BandlabAudioSourceManager())
+        if (sources.isBilibili) audioPlayerManager.registerSourceManager(BilibiliAudioSourceManager(search.isBilibili))
+        if (sources.isClyp) audioPlayerManager.registerSourceManager(ClypAudioSourceManager())
+        if (sources.isGetyarn) audioPlayerManager.registerSourceManager(GetyarnAudioSourceManager())
+        if (sources.isIheart) audioPlayerManager.registerSourceManager(iHeartAudioSourceManager(search.isIheart))
+        if (sources.isInstagram) audioPlayerManager.registerSourceManager(InstagramAudioSourceManager())
+        if (sources.isJamendo) audioPlayerManager.registerSourceManager(JamendoAudioSourceManager(search.isJamendo))
+        if (sources.isMixcloud) audioPlayerManager.registerSourceManager(MixcloudAudioSourceManager(search.isMixcloud))
+        if (sources.isNewgrounds) audioPlayerManager.registerSourceManager(NewgroundsAudioSourceManager())
+        if (sources.isOcremix) audioPlayerManager.registerSourceManager(OcremixAudioSourceManager())
+        if (sources.isOdysee) audioPlayerManager.registerSourceManager(OdyseeAudioSourceManager(search.isOdysee))
+        if (sources.isReddit) audioPlayerManager.registerSourceManager(RedditAudioSourceManager())
+        if (sources.isStreamable) audioPlayerManager.registerSourceManager(StreamableAudioSourceManager())
+        if (sources.isTiktok) audioPlayerManager.registerSourceManager(TiktokAudioSourceManager())
+        if (sources.isTunein) audioPlayerManager.registerSourceManager(TuneinAudioSourceManager())
         if (sources.isTwitch) audioPlayerManager.registerSourceManager(TwitchStreamAudioSourceManager())
         if (sources.isVimeo) audioPlayerManager.registerSourceManager(VimeoAudioSourceManager())
         if (sources.isLocal) audioPlayerManager.registerSourceManager(LocalAudioSourceManager())
+
+        if (sources.isApplemusic) audioPlayerManager.registerSourceManager(AppleMusicAudioSourceManager(search.isApplemusic, true, audioPlayerManager))
+        if (sources.isDeezer) audioPlayerManager.registerSourceManager(DeezerAudioSourceManager(search.isDeezer, true, audioPlayerManager))
+        if (sources.isNapster) audioPlayerManager.registerSourceManager(NapsterAudioSourceManager(search.isNapster, true, audioPlayerManager))
+        if (sources.isSpotify) audioPlayerManager.registerSourceManager(SpotifyAudioSourceManager(search.isSpotify, true, audioPlayerManager))
+        if (sources.isTidal) audioPlayerManager.registerSourceManager(TidalAudioSourceManager(search.isTidal, true, audioPlayerManager))
 
         audioSourceManagers.forEach {
             audioPlayerManager.registerSourceManager(it)

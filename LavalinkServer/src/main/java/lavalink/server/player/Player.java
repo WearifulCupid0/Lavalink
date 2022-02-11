@@ -54,8 +54,8 @@ public class Player extends AudioEventAdapter implements IPlayer {
     private final ServerConfig serverConfig;
     private final AudioPlayer player;
     private final AudioLossCounter audioLossCounter = new AudioLossCounter();
+    private final FilterChain filters;
     private AudioFrame lastFrame = null;
-    private FilterChain filters;
     private ScheduledFuture<?> myFuture = null;
     private boolean endMarkerHit = false;
 
@@ -67,6 +67,7 @@ public class Player extends AudioEventAdapter implements IPlayer {
         this.player.addListener(this);
         this.player.addListener(new EventEmitter(audioPlayerManager, this));
         this.player.addListener(audioLossCounter);
+        this.filters = new FilterChain(this.player);
     }
 
     public void play(AudioTrack track) {
@@ -131,12 +132,26 @@ public class Player extends AudioEventAdapter implements IPlayer {
 
         if (player.getPlayingTrack() != null)
             json.put("position", player.getPlayingTrack().getPosition());
-        json.put("time", System.currentTimeMillis());
+        
+        int sent = audioLossCounter.getLastMinuteSuccess();
+        int nulled = audioLossCounter.getLastMinuteLoss();
+
+        json
+        .put("time", System.currentTimeMillis())
+        .put("playing", isPlaying())
+        .put("paused", isPaused())
+        .put("volume", player.getVolume())
+        .put("filters", filters.encode())
+        .put("frameStats", new JSONObject()
+            .put("sent", sent)
+            .put("nulled", nulled)
+            .put("deficit", AudioLossCounter.EXPECTED_PACKET_COUNT_PER_MIN - (sent + nulled))    
+        );
 
         return json;
     }
 
-    SocketContext getSocket() {
+    public SocketContext getSocket() {
         return socketContext;
     }
 
@@ -206,17 +221,7 @@ public class Player extends AudioEventAdapter implements IPlayer {
     }
 
     @Nullable
-    public FilterChain getFilters() {
+    public FilterChain getFilterChain() {
         return filters;
-    }
-
-    public void setFilters(FilterChain filters) {
-        this.filters = filters;
-
-        if (filters.isEnabled()) {
-            player.setFilterFactory(filters);
-        } else {
-            player.setFilterFactory(null);
-        }
     }
 }
