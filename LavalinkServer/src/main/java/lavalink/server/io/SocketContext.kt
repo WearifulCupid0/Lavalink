@@ -38,7 +38,7 @@ import lavalink.server.config.ServerConfig
 import lavalink.server.player.Player
 import moe.kyokobot.koe.KoeClient
 import moe.kyokobot.koe.KoeEventAdapter
-import moe.kyokobot.koe.VoiceConnection
+import moe.kyokobot.koe.MediaConnection
 import moe.kyokobot.koe.internal.json.JsonObject
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
@@ -137,7 +137,7 @@ class SocketContext(
     /**
      * Gets or creates a voice connection
      */
-    fun getVoiceConnection(player: Player): VoiceConnection {
+    fun getVoiceConnection(player: Player): MediaConnection {
         val guildId = player.guildId
         var conn = koe.getConnection(guildId)
         if (conn == null) {
@@ -300,7 +300,16 @@ class SocketContext(
             SocketServer.sendPlayerUpdate(this@SocketContext, player)
         }
 
-        override fun userConnected(id: String, audioSSRC: Int, videoSSRC: Int) {
+        override fun gatewayResumed() {
+            val out = JSONObject()
+            out.put("op", "event")
+            out.put("type", "VoiceConnectionResumed")
+            out.put("guildId", player.guildId.toString())
+
+            send(out)
+        }
+
+        fun userConnected(id: String, audioSSRC: Int, videoSSRC: Int) {
             val out = JSONObject()
             out.put("op", "event")
             out.put("type", "VoiceUserConnected")
