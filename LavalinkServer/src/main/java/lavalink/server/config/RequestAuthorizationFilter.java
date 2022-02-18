@@ -54,6 +54,11 @@ public class RequestAuthorizationFilter implements HandlerInterceptor, WebMvcCon
             return false;
         }
 
+        if (request.getServletPath().startsWith("/gen204")) { //Good for ping.
+            response.setStatus(HttpStatus.NO_CONTENT.value());
+            return false;
+        }
+
         if (request.getServletPath().startsWith("/players")) {
             String sessionId = request.getHeader("Session-Id");
             if (sessionId == null || socketServer.getExistingContext(sessionId) == null) {

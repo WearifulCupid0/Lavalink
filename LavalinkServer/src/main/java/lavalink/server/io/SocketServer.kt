@@ -61,10 +61,12 @@ class SocketServer(
             val json = JSONObject()
 
             val state = player.state
-            val connected = socketContext.getVoiceConnection(player).gatewayConnection?.isOpen == true
-            state.put("connected", connected)
+            val connection = socketContext.getVoiceConnection(player).gatewayConnection
+            state.put("connected", connection?.isOpen == true)
+            state.put("ping", connection?.getPing() ?: -1)
 
-            json.put("op", "playerUpdate")
+            json.put("op", "event")
+            json.put("event", "PlayerStateUpdate")
             json.put("guildId", player.guildId.toString())
             json.put("state", state)
             socketContext.send(json)

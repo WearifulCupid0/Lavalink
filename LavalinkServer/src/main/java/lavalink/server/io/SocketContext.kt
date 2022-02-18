@@ -109,8 +109,7 @@ class SocketContext(
 
         sendMessage(
             JSONObject()
-            .put("op", "event")
-            .put("event", "WebsocketConnectionDataEvent")
+            .put("op", "hello")
             .put("sessionId", session.id)
             .put("info", info())
         )
@@ -145,6 +144,11 @@ class SocketContext(
             conn.registerListener(WsEventHandler(player))
         }
         return conn
+    }
+
+    fun getExistingVoiceConnection(player: Player): MediaConnection? {
+        val guildId = player.guildId
+        return koe.getConnection(guildId)
     }
 
     /**
@@ -305,48 +309,6 @@ class SocketContext(
             out.put("op", "event")
             out.put("type", "VoiceConnectionResumed")
             out.put("guildId", player.guildId.toString())
-
-            send(out)
-        }
-
-        fun userConnected(id: String, audioSSRC: Int, videoSSRC: Int) {
-            val out = JSONObject()
-            out.put("op", "event")
-            out.put("type", "VoiceUserConnected")
-            out.put("guildId", player.guildId.toString())
-            out.put("userId", id)
-            out.put("audioSSRC", audioSSRC)
-            out.put("videoSSRC", videoSSRC)
-
-            send(out)
-        }
-
-        override fun userDisconnected(id: String) {
-            val out = JSONObject()
-            out.put("op", "event")
-            out.put("type", "VoiceUserDisconnected")
-            out.put("guildId", player.guildId.toString())
-            out.put("userId", id)
-
-            send(out)
-        }
-
-        override fun externalIPDiscovered(target: InetSocketAddress) {
-            val out = JSONObject()
-            out.put("op", "event")
-            out.put("type", "VoiceExternalIPDiscovered")
-            out.put("guildId", player.guildId.toString())
-            out.put("address", target.getAddress().toString())
-            
-            send(out)
-        }
-
-        override fun sessionDescription(session: JsonObject) {
-            val out = JSONObject()
-            out.put("op", "event")
-            out.put("type", "VoiceSessionDescription")
-            out.put("guildId", player.guildId.toString())
-            out.put("session", JSONObject(session.toString()))
 
             send(out)
         }

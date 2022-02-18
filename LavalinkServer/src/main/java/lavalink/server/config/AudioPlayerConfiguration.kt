@@ -10,6 +10,7 @@ import com.sedmelluq.lavaplayer.extensions.thirdpartysources.yamusic.YandexHttpC
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.audioboom.AudioboomAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.bandlab.BandlabAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.bilibili.BilibiliAudioSourceManager
@@ -25,6 +26,7 @@ import com.sedmelluq.discord.lavaplayer.source.ocremix.OcremixAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.odysee.OdyseeAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.reddit.RedditAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.local.LocalAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.smule.SmuleAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.*
 import com.sedmelluq.discord.lavaplayer.source.streamable.StreamableAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.tiktok.TiktokAudioSourceManager
@@ -113,6 +115,7 @@ class AudioPlayerConfiguration {
                 )
             )
         }
+        if (sources.isAudioboom) audioPlayerManager.registerSourceManager(AudioboomAudioSourceManager())
         if (sources.isBandcamp) audioPlayerManager.registerSourceManager(BandcampAudioSourceManager())
         if (sources.isBandlab) audioPlayerManager.registerSourceManager(BandlabAudioSourceManager())
         if (sources.isBilibili) audioPlayerManager.registerSourceManager(BilibiliAudioSourceManager(search.isBilibili))
@@ -126,6 +129,7 @@ class AudioPlayerConfiguration {
         if (sources.isOcremix) audioPlayerManager.registerSourceManager(OcremixAudioSourceManager())
         if (sources.isOdysee) audioPlayerManager.registerSourceManager(OdyseeAudioSourceManager(search.isOdysee))
         if (sources.isReddit) audioPlayerManager.registerSourceManager(RedditAudioSourceManager())
+        if (sources.isSmule) audioPlayerManager.registerSourceManager(SmuleAudioSourceManager())
         if (sources.isStreamable) audioPlayerManager.registerSourceManager(StreamableAudioSourceManager())
         if (sources.isTiktok) audioPlayerManager.registerSourceManager(TiktokAudioSourceManager())
         if (sources.isTunein) audioPlayerManager.registerSourceManager(TuneinAudioSourceManager())

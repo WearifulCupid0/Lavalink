@@ -74,8 +74,6 @@ Provide an intercepted voice server update. This causes the server to connect to
 
 `endTime` is an optional setting that determines at the number of milliseconds at which point the track should stop playing. Helpful if you only want to play a snippet of a bigger track. By default the track plays until it's end as per the encoded data.
 
-`volume` is an optional setting which changes the volume if provided.
-
 If `noReplace` is set to true, this operation will be ignored if a track is already playing or paused. This is an optional field.
 
 If `pause` is set to true, the playback will be paused. This is an optional field.
@@ -87,7 +85,6 @@ If `pause` is set to true, the playback will be paused. This is an optional fiel
     "track": "...",
     "startTime": "60000",
     "endTime": "120000",
-    "volume": "100",
     "noReplace": false,
     "pause": false
 }
@@ -273,8 +270,9 @@ A collection of stats sent every minute.
 
 Example implementation of stats:
 ```java
-players = json.getInt("players");
-playingPlayers = json.getInt("playingPlayers");
+playersJson = json.getJSONObject("players");
+players = playersJson.getInt("total");
+playingPlayers = playersJson.getInt("playing");
 uptime = json.getLong("uptime");
 
 memFree = json.getJSONObject("memory").getInt("free");
@@ -398,7 +396,8 @@ Response:
         "position": 0,
         "title": "Rick Astley - Never Gonna Give You Up",
         "uri": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        "sourceName": "youtube"
+        "source": "youtube",
+        "artwork": "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
       }
     }
   ]
@@ -461,7 +460,8 @@ Response:
   "position": 0,
   "title": "Rick Astley - Never Gonna Give You Up",
   "uri": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-  "sourceName": "youtube"
+  "source": "youtube",
+  "artwork": "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
 }
 ```
 
@@ -493,7 +493,8 @@ Response:
         "position": 0,
         "title": "Rick Astley - Never Gonna Give You Up",
         "uri": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        "sourceName": "youtube"
+        "source": "youtube",
+        "artwork": "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
       }
     },
     ...

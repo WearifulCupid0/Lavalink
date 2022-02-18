@@ -63,8 +63,9 @@ public class AudioLoaderRestHandler {
 
     private JSONObject trackToJSON(AudioTrack audioTrack) {
         AudioTrackInfo trackInfo = audioTrack.getInfo();
-
+        
         return new JSONObject()
+                .put("class", audioTrack.getClass().getName())
                 .put("title", trackInfo.title)
                 .put("author", trackInfo.author)
                 .put("length", trackInfo.length)
@@ -74,7 +75,8 @@ public class AudioLoaderRestHandler {
                 .put("artwork", trackInfo.artworkUrl)
                 .put("isSeekable", audioTrack.isSeekable())
                 .put("position", audioTrack.getPosition())
-                .put("source", audioTrack.getSourceManager() == null ? null : audioTrack.getSourceManager().getSourceName());
+                .put("source", audioTrack.getSourceManager() == null ? "unknown" : audioTrack.getSourceManager().getSourceName())
+                .put("userData", audioTrack.getUserData() == null ? null : audioTrack.getUserData());
     }
 
     private JSONObject encodeLoadResult(LoadResult result) {
@@ -96,6 +98,10 @@ public class AudioLoaderRestHandler {
         });
 
         playlist.put("name", result.playlistName);
+        playlist.put("creator", result.playlistCreator);
+        playlist.put("image", result.playlistImage);
+        playlist.put("uri", result.playlistUri);
+        playlist.put("type", result.playlistType);
         playlist.put("selectedTrack", result.selectedTrack);
 
         json.put("playlistInfo", playlist);

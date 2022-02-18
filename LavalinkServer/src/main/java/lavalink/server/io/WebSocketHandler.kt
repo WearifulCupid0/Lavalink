@@ -99,6 +99,6 @@ class WebSocketHandler(
     }
 
     private fun ping(json: JSONObject) {
-        context.send(JSONObject().put("op", "event").put("event", "Pong"))
+        context.send(JSONObject().put("op", "pong"))
     }
 }
