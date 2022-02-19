@@ -1,6 +1,6 @@
-package lavalink.server.player;
+package lavalink.server.player.track.processing;
 
-public enum ResultStatus {
+public enum AudioResultStatus {
     TRACK_LOADED,
     PLAYLIST_LOADED,
     SEARCH_RESULT,

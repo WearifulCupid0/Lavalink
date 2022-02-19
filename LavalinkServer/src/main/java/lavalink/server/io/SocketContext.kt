@@ -296,7 +296,7 @@ class SocketContext(
             out.put("ssrc", ssrc)
             
             if (target != null) {
-                out.put("address", target.getAddress().toString() ?: "")
+                out.put("address", target.getAddress().toString())
             }
 
             send(out)

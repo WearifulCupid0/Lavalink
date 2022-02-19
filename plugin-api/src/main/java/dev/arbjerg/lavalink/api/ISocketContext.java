@@ -52,6 +52,9 @@ public interface ISocketContext {
      */
     void closeWebSocket(int closeCode, String reason);
 
+    /**
+     * Avaible states of the websocket connection.
+     */
     enum State {
         /**
          * The context has an open WebSocket

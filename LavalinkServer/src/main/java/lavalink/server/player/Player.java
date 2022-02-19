@@ -42,6 +42,9 @@ import org.slf4j.LoggerFactory;
 import dev.arbjerg.lavalink.api.IPlayer;
 
 import javax.annotation.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -52,6 +55,7 @@ public class Player extends AudioEventAdapter implements IPlayer {
     private final SocketContext socketContext;
     private final long guildId;
     private final ServerConfig serverConfig;
+    private final AudioPlayerManager playerManager;
     private final AudioPlayer player;
     private final AudioLossCounter audioLossCounter = new AudioLossCounter();
     private final FilterChain filters;
@@ -59,10 +63,15 @@ public class Player extends AudioEventAdapter implements IPlayer {
     private ScheduledFuture<?> myFuture = null;
     private boolean endMarkerHit = false;
 
+    //Sponsorblock feature.
+    private boolean sponsorblock = false;
+    private List<String> sponsorblockCategories = new ArrayList<>();
+
     public Player(SocketContext socketContext, long guildId, AudioPlayerManager audioPlayerManager, ServerConfig serverConfig) {
         this.socketContext = socketContext;
         this.guildId = guildId;
         this.serverConfig = serverConfig;
+        this.playerManager = audioPlayerManager;
         this.player = audioPlayerManager.createPlayer();
         this.player.addListener(this);
         this.player.addListener(new EventEmitter(audioPlayerManager, this));
@@ -83,8 +92,24 @@ public class Player extends AudioEventAdapter implements IPlayer {
         player.destroy();
     }
 
+    public void setSponsorblock(boolean sponsorblock) {
+        this.sponsorblock = sponsorblock;
+    }
+
+    public boolean isSponsorblockEnabled() {
+        return this.sponsorblock;
+    }
+
+    public List<String> getSponsorblockCategories() {
+        return this.sponsorblockCategories;
+    }
+
     public void setPause(boolean b) {
         player.setPaused(b);
+    }
+
+    public AudioPlayerManager getAudioPlayerManager() {
+        return this.playerManager;
     }
 
     @Override
@@ -141,6 +166,10 @@ public class Player extends AudioEventAdapter implements IPlayer {
         .put("playing", isPlaying())
         .put("paused", isPaused())
         .put("volume", player.getVolume())
+        .put("sponsorblock", new JSONObject()
+            .put("enabled", this.sponsorblock)
+            .put("categories", this.sponsorblockCategories)
+        )
         .put("filters", filters.encode())
         .put("frameStats", new JSONObject()
             .put("sent", sent)

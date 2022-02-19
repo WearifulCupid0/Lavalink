@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package lavalink.server.player;
+package lavalink.server.player.track.processing;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
@@ -30,29 +30,23 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AudioLoader implements AudioLoadResultHandler {
-
     private static final Logger log = LoggerFactory.getLogger(AudioLoader.class);
-    private static final LoadResult NO_MATCHES = new LoadResult(ResultStatus.NO_MATCHES, Collections.emptyList(),
-            null, null, null, null, null, null);
 
     private final AudioPlayerManager audioPlayerManager;
 
-    private final CompletableFuture<LoadResult> loadResult = new CompletableFuture<>();
+    private final CompletableFuture<AudioResult> loadResult = new CompletableFuture<>();
     private final AtomicBoolean used = new AtomicBoolean(false);
 
     public AudioLoader(AudioPlayerManager audioPlayerManager) {
         this.audioPlayerManager = audioPlayerManager;
     }
 
-    public CompletionStage<LoadResult> load(String identifier) {
+    public CompletionStage<AudioResult> load(String identifier) {
         boolean isUsed = this.used.getAndSet(true);
         if (isUsed) {
             throw new IllegalStateException("This loader can only be used once per instance");
@@ -67,46 +61,25 @@ public class AudioLoader implements AudioLoadResultHandler {
     @Override
     public void trackLoaded(AudioTrack audioTrack) {
         log.info("Loaded track " + audioTrack.getInfo().title);
-        ArrayList<AudioTrack> result = new ArrayList<>();
-        result.add(audioTrack);
-        this.loadResult.complete(new LoadResult(ResultStatus.TRACK_LOADED, result, null, null, null, null, null, null));
+        this.loadResult.complete(new AudioResult(audioTrack));
     }
 
     @Override
     public void playlistLoaded(AudioPlaylist audioPlaylist) {
         log.info("Loaded playlist " + audioPlaylist.getName());
-
-        String playlistName = null;
-        String playlistCreator = null;
-        String playlistImage = null;
-        String playlistUri = null;
-        String playlistType = null;
-        Integer selectedTrack = null;
-        if (!audioPlaylist.isSearchResult()) {
-            playlistName = audioPlaylist.getName();
-            playlistCreator = audioPlaylist.getCreator();
-            playlistImage = audioPlaylist.getImage();
-            playlistUri = audioPlaylist.getURI();
-            playlistType = audioPlaylist.getType();
-            selectedTrack = audioPlaylist.getTracks().indexOf(audioPlaylist.getSelectedTrack());
-        }
-
-        ResultStatus status = audioPlaylist.isSearchResult() ? ResultStatus.SEARCH_RESULT : ResultStatus.PLAYLIST_LOADED;
-        List<AudioTrack> loadedItems = audioPlaylist.getTracks();
-
-        this.loadResult.complete(new LoadResult(status, loadedItems, playlistName, playlistCreator, playlistImage, playlistUri, playlistType, selectedTrack));
+        this.loadResult.complete(new AudioResult(audioPlaylist));
     }
 
     @Override
     public void noMatches() {
         log.info("No matches found");
-        this.loadResult.complete(NO_MATCHES);
+        this.loadResult.complete(new AudioResult());
     }
 
     @Override
     public void loadFailed(FriendlyException e) {
         log.error("Load failed", e);
-        this.loadResult.complete(new LoadResult(e));
+        this.loadResult.complete(new AudioResult(e));
     }
 
 }

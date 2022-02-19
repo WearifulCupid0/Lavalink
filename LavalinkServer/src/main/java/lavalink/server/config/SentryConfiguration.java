@@ -25,6 +25,7 @@ public class SentryConfiguration {
     private static final Logger log = LoggerFactory.getLogger(SentryConfiguration.class);
     private static final String SENTRY_APPENDER_NAME = "SENTRY";
 
+    @SuppressWarnings("deprecation")
     public SentryConfiguration(ServerConfig serverConfig, SentryConfigProperties sentryConfig) {
 
         String dsn = sentryConfig.getDsn();
