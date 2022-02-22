@@ -62,7 +62,6 @@ public class RequestUtil {
 
         if (loader.loadResultType == AudioResultStatus.PLAYLIST_LOADED && loader.playlist != null) {
             playlist
-            .put("class", loader.playlist.getClass().getName())
             .put("name", loader.playlist.getName())
             .put("creator", loader.playlist.getCreator())
             .put("image", loader.playlist.getImage())
