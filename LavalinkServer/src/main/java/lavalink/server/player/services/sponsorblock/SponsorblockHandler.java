@@ -1,7 +1,8 @@
-package lavalink.server.player.track.sponsorblock;
+package lavalink.server.player.services.sponsorblock;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import lavalink.server.player.Player;
+import lavalink.server.player.services.PlayerServicesHandler;
 import lavalink.server.util.Util;
 
 import org.json.JSONArray;
@@ -45,10 +46,11 @@ public class SponsorblockHandler {
 
         return new JSONArray(responseText);
     }
-    public static void handleTrack(AudioTrack track, Player player) {
+
+    public static void handleTrack(AudioTrack track, PlayerServicesHandler servicesHandler) {
         String identifier = track.getIdentifier();
         try {
-            JSONArray array = SponsorblockHandler.fetchSegments(identifier, player.getSponsorblockCategories());
+            JSONArray array = SponsorblockHandler.fetchSegments(identifier, servicesHandler.getSponsorBlockCategories());
             List<Segment> segments = new ArrayList<>();
 
             for (int i = 0; i < array.length(); i++) {
@@ -59,16 +61,16 @@ public class SponsorblockHandler {
                 JSONObject json = new JSONObject()
                     .put("op", "event")
                     .put("event", "TrackSegmentLoaded")
-                    .put("guildId", player.getGuildId())
+                    .put("guildId", servicesHandler.getPlayer().getGuildId())
                     .put("segments", new JSONArray(segments.stream().map(Segment::encode).collect(Collectors.toList())));
 
                     try {
-                        json.put("track", Util.toMessage(player.getAudioPlayerManager(), track));
+                        json.put("track", Util.toMessage(servicesHandler.getPlayer().getAudioPlayerManager(), track));
                     } catch (Exception e) {
                         json.put("track", JSONObject.NULL);
                     }
                 
-                player.getSocket().sendMessage(json);
+                servicesHandler.getPlayer().getSocket().sendMessage(json);
             }
         } catch (Exception e) {
             log.error(String.format("Failed to fetch video segments from video id {}", identifier), e);

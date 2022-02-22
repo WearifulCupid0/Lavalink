@@ -41,6 +41,7 @@ public class AudioSourcesConfig {
     private boolean tiktok = true;
     private boolean tunein = true;
     private boolean twitch = true;
+    private boolean twitter = true;
     private boolean vimeo = true;
     private boolean youtube = true;
 
@@ -269,6 +270,14 @@ public class AudioSourcesConfig {
 
     public void setTwitch(boolean twitch) {
         this.twitch = twitch;
+    }
+
+    public boolean isTwitter() {
+        return this.twitter;
+    }
+
+    public void setTwitter(boolean twitter) {
+        this.twitter = twitter;
     }
 
     public boolean isVimeo() {

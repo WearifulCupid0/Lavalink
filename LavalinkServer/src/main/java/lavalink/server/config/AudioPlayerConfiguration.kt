@@ -32,6 +32,7 @@ import com.sedmelluq.discord.lavaplayer.source.streamable.StreamableAudioSourceM
 import com.sedmelluq.discord.lavaplayer.source.tiktok.TiktokAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.tunein.TuneinAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.twitter.TwitterAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
 import com.sedmelluq.lava.extensions.youtuberotator.YoutubeIpRotatorSetup
@@ -134,6 +135,7 @@ class AudioPlayerConfiguration {
         if (sources.isTiktok) audioPlayerManager.registerSourceManager(TiktokAudioSourceManager())
         if (sources.isTunein) audioPlayerManager.registerSourceManager(TuneinAudioSourceManager())
         if (sources.isTwitch) audioPlayerManager.registerSourceManager(TwitchStreamAudioSourceManager())
+        if (sources.isTwitter) audioPlayerManager.registerSourceManager(TwitterAudioSourceManager())
         if (sources.isVimeo) audioPlayerManager.registerSourceManager(VimeoAudioSourceManager())
         if (sources.isLocal) audioPlayerManager.registerSourceManager(LocalAudioSourceManager())
 

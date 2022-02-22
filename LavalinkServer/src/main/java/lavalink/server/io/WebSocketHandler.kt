@@ -5,6 +5,8 @@ import dev.arbjerg.lavalink.api.AudioFilterExtension
 import dev.arbjerg.lavalink.api.WebSocketExtension
 import lavalink.server.player.TrackEndMarkerHandler
 import lavalink.server.player.filters.FilterChain
+import lavalink.server.player.track.processing.AudioLoader
+import lavalink.server.util.RequestUtil
 import lavalink.server.util.Util
 import moe.kyokobot.koe.VoiceServerInfo
 import org.json.JSONObject
@@ -33,7 +35,8 @@ class WebSocketHandler(
         "filters" to ::filters,
         "destroy" to ::destroy,
         "configureResuming" to ::configureResuming,
-        "ping" to ::ping
+        "ping" to ::ping,
+        "loadTracks" to ::loadTracks
     ).apply {
         wsExtensions.forEach {
             val func = fun(json: JSONObject) { it.onInvocation(context, json) }
@@ -100,5 +103,15 @@ class WebSocketHandler(
 
     private fun ping(json: JSONObject) {
         context.send(JSONObject().put("op", "pong"))
+    }
+
+    private fun loadTracks(json: JSONObject) {
+        AudioLoader(context.audioPlayerManager).load(json.getString("identifier"))
+        .thenApply {
+            RequestUtil.encodeLoadResult(it, context.audioPlayerManager)
+        }
+        .thenApply {
+            context.send(json.put("data", it))
+        };
     }
 }

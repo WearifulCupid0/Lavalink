@@ -1,4 +1,4 @@
-package lavalink.server.player.track.sponsorblock;
+package lavalink.server.player.services.sponsorblock;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

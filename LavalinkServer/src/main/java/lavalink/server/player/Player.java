@@ -33,8 +33,10 @@ import dev.arbjerg.lavalink.api.ISocketContext;
 import lavalink.server.io.SocketContext;
 import lavalink.server.io.SocketServer;
 import lavalink.server.player.filters.FilterChain;
+import lavalink.server.player.services.PlayerServicesHandler;
 import lavalink.server.config.ServerConfig;
 import moe.kyokobot.koe.MediaConnection;
+import moe.kyokobot.koe.gateway.MediaGatewayConnection;
 import moe.kyokobot.koe.media.OpusAudioFrameProvider;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -59,13 +61,10 @@ public class Player extends AudioEventAdapter implements IPlayer {
     private final AudioPlayer player;
     private final AudioLossCounter audioLossCounter = new AudioLossCounter();
     private final FilterChain filters;
+    private final PlayerServicesHandler servicesHandler;
     private AudioFrame lastFrame = null;
     private ScheduledFuture<?> myFuture = null;
     private boolean endMarkerHit = false;
-
-    //Sponsorblock feature.
-    private boolean sponsorblock = false;
-    private List<String> sponsorblockCategories = new ArrayList<>();
 
     public Player(SocketContext socketContext, long guildId, AudioPlayerManager audioPlayerManager, ServerConfig serverConfig) {
         this.socketContext = socketContext;
@@ -77,6 +76,7 @@ public class Player extends AudioEventAdapter implements IPlayer {
         this.player.addListener(new EventEmitter(audioPlayerManager, this));
         this.player.addListener(audioLossCounter);
         this.filters = new FilterChain(this.player);
+        this.servicesHandler = new PlayerServicesHandler(this);
     }
 
     public void play(AudioTrack track) {
@@ -92,24 +92,16 @@ public class Player extends AudioEventAdapter implements IPlayer {
         player.destroy();
     }
 
-    public void setSponsorblock(boolean sponsorblock) {
-        this.sponsorblock = sponsorblock;
-    }
-
-    public boolean isSponsorblockEnabled() {
-        return this.sponsorblock;
-    }
-
-    public List<String> getSponsorblockCategories() {
-        return this.sponsorblockCategories;
-    }
-
     public void setPause(boolean b) {
         player.setPaused(b);
     }
 
     public AudioPlayerManager getAudioPlayerManager() {
         return this.playerManager;
+    }
+
+    public PlayerServicesHandler getServicesHandler() {
+        return this.servicesHandler;
     }
 
     @Override
@@ -156,25 +148,32 @@ public class Player extends AudioEventAdapter implements IPlayer {
         JSONObject json = new JSONObject();
 
         if (player.getPlayingTrack() != null)
-            json.put("position", player.getPlayingTrack().getPosition());
+            json.put("position", player.getPlayingTrack().getPosition() * this.filters.getTimescaleConfig().getSpeed());
+
+        MediaConnection connection = this.socketContext.getExistingVoiceConnection(this);
         
-        int sent = audioLossCounter.getLastMinuteSuccess();
-        int nulled = audioLossCounter.getLastMinuteLoss();
+        if (connection != null && connection.getGatewayConnection() != null) {
+            MediaGatewayConnection gatewayConnection = connection.getGatewayConnection();
+            json
+            .put("ping", gatewayConnection.getPing())
+            .put("connected", gatewayConnection.isOpen());
+        }
+
+        int sent = this.audioLossCounter.getLastMinuteSent().sum();
+        int nulled = this.audioLossCounter.getLastMinuteNulled().sum();
 
         json
         .put("time", System.currentTimeMillis())
         .put("playing", isPlaying())
-        .put("paused", isPaused())
+        .put("paused", player.isPaused())
         .put("volume", player.getVolume())
-        .put("sponsorblock", new JSONObject()
-            .put("enabled", this.sponsorblock)
-            .put("categories", this.sponsorblockCategories)
-        )
+        .put("services", servicesHandler.encode())
         .put("filters", filters.encode())
         .put("frameStats", new JSONObject()
             .put("sent", sent)
             .put("nulled", nulled)
-            .put("deficit", AudioLossCounter.EXPECTED_PACKET_COUNT_PER_MIN - (sent + nulled))    
+            .put("deficit", AudioLossCounter.EXPECTED_PACKET_COUNT_PER_MIN - (sent + nulled))
+            .put("usable", this.audioLossCounter.isDataUsable())  
         );
 
         return json;

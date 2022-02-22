@@ -26,6 +26,7 @@ import lavalink.server.info.AppInfo
 import lavalink.server.info.GitRepoState
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary
+import com.github.natanbc.lavadsp.DspInfo
 import dev.arbjerg.lavalink.api.AudioFilterExtension
 import dev.arbjerg.lavalink.api.ISocketContext
 import dev.arbjerg.lavalink.api.PluginEventHandler
@@ -218,7 +219,7 @@ class SocketContext(
         .put("build", appInfo.buildNumber.takeUnless { it.startsWith("@") } ?: "Unofficial")
         .put("java", System.getProperty("java.version"))
         .put("lavaplayer", PlayerLibrary.VERSION)
-
+        .put("lavadsp", DspInfo.VERSION)
 
         val gitRepoState = GitRepoState()
         if (gitRepoState.isLoaded) {
@@ -248,6 +249,7 @@ class SocketContext(
         }
 
         players.values.forEach { SocketServer.sendPlayerUpdate(this, it) }
+        send(JSONObject().put("op", "resume").put("sessionId", session.id))
     }
 
     internal fun shutdown() {
@@ -277,7 +279,7 @@ class SocketContext(
         override fun gatewayClosed(code: Int, reason: String?, byRemote: Boolean) {
             val out = JSONObject()
             out.put("op", "event")
-            out.put("type", "VoiceConnectionClosed")
+            out.put("event", "VoiceConnectionClosed")
             out.put("guildId", player.guildId.toString())
             out.put("reason", reason ?: "")
             out.put("code", code)
@@ -291,7 +293,7 @@ class SocketContext(
         override fun gatewayReady(target: InetSocketAddress?, ssrc: Int) {
             val out = JSONObject()
             out.put("op", "event")
-            out.put("type", "VoiceConnectionReady")
+            out.put("event", "VoiceConnectionReady")
             out.put("guildId", player.guildId.toString())
             out.put("ssrc", ssrc)
             
@@ -307,7 +309,7 @@ class SocketContext(
         override fun gatewayResumed() {
             val out = JSONObject()
             out.put("op", "event")
-            out.put("type", "VoiceConnectionResumed")
+            out.put("event", "VoiceConnectionResumed")
             out.put("guildId", player.guildId.toString())
 
             send(out)

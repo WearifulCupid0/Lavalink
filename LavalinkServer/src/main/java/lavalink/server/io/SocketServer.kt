@@ -61,9 +61,6 @@ class SocketServer(
             val json = JSONObject()
 
             val state = player.state
-            val connection = socketContext.getVoiceConnection(player).gatewayConnection
-            state.put("connected", connection?.isOpen == true)
-            state.put("ping", connection?.getPing() ?: -1)
 
             json.put("op", "event")
             json.put("event", "PlayerStateUpdate")
@@ -147,7 +144,7 @@ class SocketServer(
     }
 
     fun getExistingContext(id: String): SocketContext? {
-        return contextMap.get(id)
+        return contextMap.get(id) ?: resumableSessions.get(id)
     }
 
     override fun handleTextMessage(session: WebSocketSession?, message: TextMessage?) {

@@ -15,14 +15,14 @@ public class AudioResult {
     public FriendlyException exception;
 
     public AudioResult(AudioPlaylist playlist) {
-        this.loadResultType = playlist.isSearchResult() ? AudioResultStatus.PLAYLIST_LOADED : AudioResultStatus.SEARCH_RESULT;;
-        this.playlist = playlist;
+        this.loadResultType = playlist.isSearchResult() ? AudioResultStatus.SEARCH_RESULT : AudioResultStatus.PLAYLIST_LOADED;;
+        this.playlist = playlist.isSearchResult() ? null : playlist;
         this.tracks = playlist.getTracks();
         this.exception = null;
     }
 
     public AudioResult(AudioTrack track) {
-        this.loadResultType = AudioResultStatus.NO_MATCHES;
+        this.loadResultType = AudioResultStatus.TRACK_LOADED;
         this.playlist = null;
         this.exception = null;
         List<AudioTrack> list = new ArrayList<>();

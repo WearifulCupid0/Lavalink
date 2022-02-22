@@ -101,29 +101,30 @@ public class StatsTask implements Runnable {
 
         out.put("cpu", cpu);
 
-        int totalSent = 0;
-        int totalNulled = 0;
-        int players = 0;
-
-        for (Player player : context.getPlayingPlayers()) {
+        int[] frameStats = new int[3];
+        
+        context.getPlayingPlayers().forEach(player -> {
             AudioLossCounter counter = player.getAudioLossCounter();
-            if (!counter.isDataUsable()) continue;
-
-            players++;
-            totalSent += counter.getLastMinuteSuccess();
-            totalNulled += counter.getLastMinuteLoss();
-        }
-
-        int totalDeficit = players * AudioLossCounter.EXPECTED_PACKET_COUNT_PER_MIN
+            if(counter.isDataUsable()) {
+                frameStats[0]++;
+                frameStats[1] += counter.getLastMinuteSent().sum();
+                frameStats[2] += counter.getLastMinuteNulled().sum();
+            }
+        });
+        
+        int totalPlayers = frameStats[0];
+        int totalSent = frameStats[1];
+        int totalNulled = frameStats[2];
+        
+        int totalDeficit = totalPlayers * AudioLossCounter.EXPECTED_PACKET_COUNT_PER_MIN
                 - (totalSent + totalNulled);
-
+        
         // We can't divide by 0
-        if (players != 0) {
-            JSONObject frames = new JSONObject();
-            frames.put("sent", totalSent / players);
-            frames.put("nulled", totalNulled / players);
-            frames.put("deficit", totalDeficit / players);
-            out.put("frameStats", frames);
+        if(totalPlayers != 0) {
+            out.put("frameStats", new JSONObject()
+            .put("sent", totalSent / totalPlayers)
+            .put("nulled", totalNulled / totalPlayers)
+            .put("deficit", totalDeficit / totalPlayers));
         }
 
         context.send(out);

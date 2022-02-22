@@ -23,6 +23,7 @@
 package lavalink.server
 
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary
+import com.github.natanbc.lavadsp.DspInfo
 import lavalink.server.bootstrap.PluginManager
 import lavalink.server.info.AppInfo
 import lavalink.server.info.GitRepoState
@@ -90,7 +91,8 @@ object Launcher {
                 append("${indentation}Commit time:    "); appendln(commitTime)
             }
             append("${indentation}JVM:            "); appendln(System.getProperty("java.version"))
-            append("${indentation}Lavaplayer      "); appendln(PlayerLibrary.VERSION)
+            append("${indentation}Lavaplayer:     "); appendln(PlayerLibrary.VERSION)
+            append("${indentation}Lavadsp:        "); appendln(DspInfo.VERSION)
         }
     }
 

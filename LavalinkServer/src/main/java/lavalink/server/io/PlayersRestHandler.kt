@@ -61,7 +61,7 @@ class PlayersRestHandler(private val server: SocketServer) {
     fun playerVoice(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<Void> {
         val context = getExistingContext(request.getHeader("Session-Id"))
         if (context == null) return ResponseEntity(HttpStatus.NOT_FOUND)
-        val player = getExistingPlayer(guildId, context)
+        val player = getOrCreatePlayer(guildId, context)
         if (player == null) return ResponseEntity(HttpStatus.NOT_FOUND)
         if (body.isBlank()) return ResponseEntity(HttpStatus.BAD_REQUEST)
         context.playerHandler.voiceUpdate(JSONObject(body), player)
