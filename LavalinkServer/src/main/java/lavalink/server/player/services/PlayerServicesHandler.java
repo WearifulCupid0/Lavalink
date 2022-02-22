@@ -1,5 +1,6 @@
 package lavalink.server.player.services;
 
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
@@ -50,7 +51,8 @@ public class PlayerServicesHandler {
     }
 
     public void handleTrackStart(AudioTrack track) {
-        if (this.sponsorBlock && !this.sponsorBlockCategories.isEmpty()) {
+        AudioSourceManager sourceManager = track.getSourceManager();
+        if (this.sponsorBlock && !this.sponsorBlockCategories.isEmpty() && (sourceManager != null && sourceManager.getSourceName().equals("youtube"))) {
             SponsorblockHandler.handleTrack(track, this);
         }
     }

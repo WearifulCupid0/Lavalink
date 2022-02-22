@@ -3,6 +3,8 @@ package lavalink.server.util;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
+import com.sedmelluq.lavaplayer.extensions.thirdpartysources.ThirdPartyAudioTrack;
+
 import lavalink.server.player.track.processing.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -17,7 +19,7 @@ public class RequestUtil {
     public static JSONObject trackToJSON(AudioTrack audioTrack) {
         AudioTrackInfo trackInfo = audioTrack.getInfo();
 
-        return new JSONObject()
+        JSONObject out = new JSONObject()
                 .put("class", audioTrack.getClass().getName())
                 .put("title", trackInfo.title)
                 .put("author", trackInfo.author)
@@ -30,6 +32,14 @@ public class RequestUtil {
                 .put("position", audioTrack.getPosition())
                 .put("source", audioTrack.getSourceManager() != null ? audioTrack.getSourceManager().getSourceName() : "unknown")
                 .put("userData", audioTrack.getUserData());
+
+        if (audioTrack instanceof ThirdPartyAudioTrack) {
+            ThirdPartyAudioTrack track = ((ThirdPartyAudioTrack) audioTrack);
+            String isrc = track.getISRC();
+            if (isrc != null) out.put("isrc", isrc);
+        }
+    
+        return out;
     }
 
     public static JSONObject encodeLoadResult(AudioResult loader, AudioPlayerManager audioPlayerManager) {
@@ -66,13 +76,11 @@ public class RequestUtil {
         root.put("tracks", tracks);
 
         if (loader.loadResultType == AudioResultStatus.LOAD_FAILED && loader.exception != null) {
-            JSONObject exception = new JSONObject();
-            exception
-            .put("message", loader.exception.getLocalizedMessage())
-            .put("severity", loader.exception.severity.toString())
-            .put("cause", Util.getRootCause(loader.exception).toString());
-
-            root.put("exception", exception);
+            root.put("exception", new JSONObject()
+                .put("message", loader.exception.getLocalizedMessage())
+                .put("severity", loader.exception.severity.toString())
+                .put("cause", Util.getRootCause(loader.exception).toString())
+            );
             log.error("Track loading failed", loader.exception);
         }
 
