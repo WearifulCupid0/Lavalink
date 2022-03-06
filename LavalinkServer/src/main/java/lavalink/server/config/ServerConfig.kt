@@ -22,6 +22,8 @@
 
 package lavalink.server.config
 
+import lavalink.server.config.YandexConfig
+import lavalink.server.config.HttpAudioConfig
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 
@@ -38,5 +40,6 @@ class ServerConfig {
     var isGcWarnings = true
     var ratelimit: RateLimitConfig? = null
     var youtubeConfig: YoutubeConfig? = null
-    var httpConfig: HttpConfig? = null
+    var httpAudioConfig: HttpAudioConfig? = null
+    var yandexConfig: YandexConfig? = null
 }

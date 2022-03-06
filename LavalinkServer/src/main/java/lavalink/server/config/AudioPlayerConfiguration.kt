@@ -7,10 +7,10 @@ import com.sedmelluq.lavaplayer.extensions.thirdpartysources.spotify.SpotifyAudi
 import com.sedmelluq.lavaplayer.extensions.thirdpartysources.tidal.TidalAudioSourceManager
 import com.sedmelluq.lavaplayer.extensions.thirdpartysources.yamusic.YandexMusicAudioSourceManager
 import com.sedmelluq.lavaplayer.extensions.thirdpartysources.yamusic.YandexHttpContextFilter
+import com.sedmelluq.discord.lavaplayer.container.MediaContainerRegistry
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager
-import com.sedmelluq.discord.lavaplayer.source.audioboom.AudioboomAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.bandlab.BandlabAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.bilibili.BilibiliAudioSourceManager
@@ -26,7 +26,6 @@ import com.sedmelluq.discord.lavaplayer.source.ocremix.OcremixAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.odysee.OdyseeAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.reddit.RedditAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.local.LocalAudioSourceManager
-import com.sedmelluq.discord.lavaplayer.source.smule.SmuleAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.*
 import com.sedmelluq.discord.lavaplayer.source.streamable.StreamableAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.tiktok.TiktokAudioSourceManager
@@ -35,6 +34,7 @@ import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceMan
 import com.sedmelluq.discord.lavaplayer.source.twitter.TwitterAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
+import com.sedmelluq.lavaplayer.extensions.format.xm.XmContainerProbe
 import com.sedmelluq.lava.extensions.youtuberotator.YoutubeIpRotatorSetup
 import com.sedmelluq.lava.extensions.youtuberotator.planner.*
 import com.sedmelluq.lava.extensions.youtuberotator.tools.ip.Ipv4Block
@@ -43,7 +43,7 @@ import dev.arbjerg.lavalink.api.AudioPlayerManagerConfiguration
 import org.apache.http.HttpHost
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
-import org.apache.http.client.CredentialsProvider
+import org.apache.http.client.config.RequestConfig
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
@@ -116,7 +116,6 @@ class AudioPlayerConfiguration {
                 )
             )
         }
-        if (sources.isAudioboom) audioPlayerManager.registerSourceManager(AudioboomAudioSourceManager())
         if (sources.isBandcamp) audioPlayerManager.registerSourceManager(BandcampAudioSourceManager())
         if (sources.isBandlab) audioPlayerManager.registerSourceManager(BandlabAudioSourceManager())
         if (sources.isBilibili) audioPlayerManager.registerSourceManager(BilibiliAudioSourceManager(search.isBilibili))
@@ -130,7 +129,6 @@ class AudioPlayerConfiguration {
         if (sources.isOcremix) audioPlayerManager.registerSourceManager(OcremixAudioSourceManager())
         if (sources.isOdysee) audioPlayerManager.registerSourceManager(OdyseeAudioSourceManager(search.isOdysee))
         if (sources.isReddit) audioPlayerManager.registerSourceManager(RedditAudioSourceManager())
-        if (sources.isSmule) audioPlayerManager.registerSourceManager(SmuleAudioSourceManager())
         if (sources.isStreamable) audioPlayerManager.registerSourceManager(StreamableAudioSourceManager())
         if (sources.isTiktok) audioPlayerManager.registerSourceManager(TiktokAudioSourceManager())
         if (sources.isTunein) audioPlayerManager.registerSourceManager(TuneinAudioSourceManager())
@@ -139,11 +137,40 @@ class AudioPlayerConfiguration {
         if (sources.isVimeo) audioPlayerManager.registerSourceManager(VimeoAudioSourceManager())
         if (sources.isLocal) audioPlayerManager.registerSourceManager(LocalAudioSourceManager())
 
-        if (sources.isApplemusic) audioPlayerManager.registerSourceManager(AppleMusicAudioSourceManager(search.isApplemusic, true, audioPlayerManager))
-        if (sources.isDeezer) audioPlayerManager.registerSourceManager(DeezerAudioSourceManager(search.isDeezer, true, audioPlayerManager))
-        if (sources.isNapster) audioPlayerManager.registerSourceManager(NapsterAudioSourceManager(search.isNapster, true, audioPlayerManager))
-        if (sources.isSpotify) audioPlayerManager.registerSourceManager(SpotifyAudioSourceManager(search.isSpotify, true, audioPlayerManager))
-        if (sources.isTidal) audioPlayerManager.registerSourceManager(TidalAudioSourceManager(search.isTidal, true, audioPlayerManager))
+        if (sources.isApplemusic) audioPlayerManager.registerSourceManager(AppleMusicAudioSourceManager(search.isApplemusic, audioPlayerManager))
+        if (sources.isDeezer) audioPlayerManager.registerSourceManager(DeezerAudioSourceManager(search.isDeezer, audioPlayerManager))
+        if (sources.isNapster) audioPlayerManager.registerSourceManager(NapsterAudioSourceManager(search.isNapster, audioPlayerManager))
+        if (sources.isSpotify) audioPlayerManager.registerSourceManager(SpotifyAudioSourceManager(search.isSpotify, audioPlayerManager))
+        if (sources.isTidal) audioPlayerManager.registerSourceManager(TidalAudioSourceManager(search.isTidal, audioPlayerManager))
+        if (sources.isYandex) {
+            val yandexConfig = serverConfig.yandexConfig
+            val yandex = YandexMusicAudioSourceManager(search.isYandex, audioPlayerManager)
+
+            if (yandexConfig != null) {
+                if (yandexConfig.proxyHost.isNotBlank() && yandexConfig.proxyTimeout != -1) {
+                    val credentials = UsernamePasswordCredentials(yandexConfig.proxyLogin, yandexConfig.proxyPass)
+                    val credsProvider = BasicCredentialsProvider()
+                    val authScope = AuthScope(yandexConfig.proxyHost, yandexConfig.proxyPort)
+                    credsProvider.setCredentials(authScope, credentials)
+                    yandex.configureBuilder { builder ->
+                        builder.setProxy(HttpHost(yandexConfig.proxyHost, yandexConfig.proxyPort))
+                        .setDefaultCredentialsProvider(credsProvider) }
+                    yandex.configureRequests {
+                        RequestConfig.copy(it).apply {
+                            setConnectTimeout(yandexConfig.proxyTimeout)
+                            setSocketTimeout(yandexConfig.proxyTimeout)
+                            setConnectionRequestTimeout(yandexConfig.proxyTimeout)
+                        }.build()
+                    }
+                }
+            
+                if (yandexConfig.token.isNotBlank()) {
+                    YandexHttpContextFilter.setOAuthToken(yandexConfig.token)
+                }
+            }
+
+            audioPlayerManager.registerSourceManager(yandex)
+        }
 
         audioSourceManagers.forEach {
             audioPlayerManager.registerSourceManager(it)
@@ -160,26 +187,29 @@ class AudioPlayerConfiguration {
 
         // This must be loaded last
         if (sources.isHttp) {
-            val httpAudioSourceManager = HttpAudioSourceManager()
+            val httpAudioConfig = serverConfig.httpAudioConfig
+            val http = HttpAudioSourceManager(MediaContainerRegistry.extended(XmContainerProbe()))
 
-            serverConfig.httpConfig?.let { httpConfig ->
-                httpAudioSourceManager.configureBuilder {
-                    if (httpConfig.proxyHost.isNotBlank()) {
-                        val credsProvider: CredentialsProvider = BasicCredentialsProvider()
-                        credsProvider.setCredentials(
-                            AuthScope(httpConfig.proxyHost, httpConfig.proxyPort),
-                            UsernamePasswordCredentials(httpConfig.proxyUser, httpConfig.proxyPassword)
-                        )
-
-                        it.setProxy(HttpHost(httpConfig.proxyHost, httpConfig.proxyPort))
-                        if (httpConfig.proxyUser.isNotBlank()) {
-                            it.setDefaultCredentialsProvider(credsProvider)
-                        }
+            if (httpAudioConfig != null) {
+                if (httpAudioConfig.proxyHost.isNotBlank() && httpAudioConfig.proxyTimeout != -1) {
+                    val credentials = UsernamePasswordCredentials(httpAudioConfig.proxyLogin, httpAudioConfig.proxyPass)
+                    val credsProvider = BasicCredentialsProvider()
+                    val authScope = AuthScope(httpAudioConfig.proxyHost, httpAudioConfig.proxyPort)
+                    credsProvider.setCredentials(authScope, credentials)
+                    http.configureBuilder { builder ->
+                    builder.setProxy(HttpHost(httpAudioConfig.proxyHost, httpAudioConfig.proxyPort))
+                            .setDefaultCredentialsProvider(credsProvider) }
+                    http.configureRequests {
+                        RequestConfig.copy(it).apply {
+                            setConnectTimeout(httpAudioConfig.proxyTimeout)
+                            setSocketTimeout(httpAudioConfig.proxyTimeout)
+                            setConnectionRequestTimeout(httpAudioConfig.proxyTimeout)
+                        }.build()
                     }
                 }
             }
-
-            audioPlayerManager.registerSourceManager(httpAudioSourceManager)
+            
+            audioPlayerManager.registerSourceManager(http)
         }
 
         return am

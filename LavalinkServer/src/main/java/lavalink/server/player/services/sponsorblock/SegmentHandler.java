@@ -31,10 +31,10 @@ public class SegmentHandler implements TrackMarkerHandler {
 
     @Override
     public void handle(MarkerState state) {
-        if (state != MarkerState.REACHED || state != MarkerState.LATE) return;
+        if (!(state == MarkerState.REACHED || state == MarkerState.LATE)) return;
         Segment segment = this.getCurrentSegment();
-        if (!this.servicesHandler.isSponsorBlockEnabled() ||
-            !this.servicesHandler.getSponsorBlockCategories().contains(segment.getCategory())) return;
+        if (!this.servicesHandler.isSponsorblockEnabled()) return;
+
         track.setPosition(segment.getEndTime());
         JSONObject json = new JSONObject()
             .put("op", "event")

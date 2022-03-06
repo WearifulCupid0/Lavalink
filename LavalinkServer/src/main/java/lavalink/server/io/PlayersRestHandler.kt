@@ -122,6 +122,17 @@ class PlayersRestHandler(private val server: SocketServer) {
         return ResponseEntity.ok(player.getState().toString())
     }
 
+    @PatchMapping("/players/{guildId}/services")
+    fun playerServices(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<String> {
+        val context = getExistingContext(request.getHeader("Session-Id"))
+        if (context == null) return ResponseEntity(HttpStatus.NOT_FOUND)
+        val player = getExistingPlayer(guildId, context)
+        if (player == null) return ResponseEntity(HttpStatus.NOT_FOUND)
+        if (body.isBlank()) return ResponseEntity(HttpStatus.BAD_REQUEST)
+        player.getServicesHandler().parseJSON(JSONObject(body))
+        return ResponseEntity.ok(player.getState().toString())
+    }
+
     @PatchMapping("/players/{guildId}/volume")
     fun playerVolume(request: HttpServletRequest, @PathVariable("guildId") guildId: String, @RequestBody body: String): ResponseEntity<String> {
         val context = getExistingContext(request.getHeader("Session-Id"))

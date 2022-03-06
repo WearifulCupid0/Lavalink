@@ -162,71 +162,71 @@ public class FilterChain {
         if (json.has("channelmix")) {
             JSONObject channelMix = json.getJSONObject("channelmix");
             ChannelMixConfig channelMixConfig = filterChain.getChannelMixConfig();
-            channelMixConfig.setLeftToLeft(channelMix.getFloat("leftToLeft"));
-            channelMixConfig.setLeftToRight(channelMix.getFloat("leftToRight"));
-            channelMixConfig.setRightToLeft(channelMix.getFloat("rightToLeft"));
-            channelMixConfig.setRightToRight(channelMix.getFloat("rightToRight"));
+            channelMixConfig.setLeftToLeft(channelMix.optFloat("leftToLeft", channelMixConfig.getLeftToLeft()));
+            channelMixConfig.setLeftToRight(channelMix.optFloat("leftToRight", channelMixConfig.getLeftToRight()));
+            channelMixConfig.setRightToLeft(channelMix.optFloat("rightToLeft", channelMixConfig.getRightToLeft()));
+            channelMixConfig.setRightToRight(channelMix.optFloat("rightToRight", channelMixConfig.getRightToRight()));
         }
         if (json.has("distortion")) {
             JSONObject distortion = json.getJSONObject("distortion");
             DistortionConfig distortionConfig = filterChain.getDistortionConfig();
-            distortionConfig.setSinOffset(distortion.getFloat("singOffset"));
-            distortionConfig.setSinScale(distortion.getFloat("sinScale"));
-            distortionConfig.setCosOffset(distortion.getFloat("cosOffset"));
-            distortionConfig.setCosScale(distortion.getFloat("cosScale"));
-            distortionConfig.setTanOffset(distortion.getFloat("tanOffset"));
-            distortionConfig.setTanScale(distortion.getFloat("tanScale"));
-            distortionConfig.setOffset(distortion.getFloat("offset"));
-            distortionConfig.setScale(distortion.getFloat("scale"));
+            distortionConfig.setSinOffset(distortion.optFloat("sinOffset", distortionConfig.getSinOffset()));
+            distortionConfig.setSinScale(distortion.optFloat("sinScale", distortionConfig.getSinScale()));
+            distortionConfig.setCosOffset(distortion.optFloat("cosOffset", distortionConfig.getCosOffset()));
+            distortionConfig.setCosScale(distortion.optFloat("cosScale", distortionConfig.getCosScale()));
+            distortionConfig.setTanOffset(distortion.optFloat("tanOffset", distortionConfig.getTanOffset()));
+            distortionConfig.setTanScale(distortion.optFloat("tanScale", distortionConfig.getTanScale()));
+            distortionConfig.setOffset(distortion.optFloat("offset", distortionConfig.getOffset()));
+            distortionConfig.setScale(distortion.optFloat("scale", distortionConfig.getScale()));
         }
         if (json.has("equalizer")) {
             JSONArray array = json.getJSONObject("equalizer").getJSONArray("bands");
             EqualizerConfig equalizerConfig = filterChain.getEqualizerConfig();
             for(int i = 0; i < array.length(); i++) {
                 JSONObject band = array.getJSONObject(i);
-                equalizerConfig.setBand(band.getInt("band"), band.getFloat("gain"));
+                equalizerConfig.setBand(band.optInt("band", i), band.getFloat("gain"));
             }
         }
         if (json.has("karaoke")) {
             JSONObject karaoke = json.getJSONObject("karaoke");
             KaraokeConfig karaokeConfig = filterChain.getKaraokeConfig();
-            karaokeConfig.setLevel(karaoke.getFloat("level"));
-            karaokeConfig.setMonoLevel(karaoke.getFloat("monoLevel"));
-            karaokeConfig.setFilterBand(karaoke.getFloat("filterBand"));
-            karaokeConfig.setFilterWidth(karaoke.getFloat("filterWidth"));
+            karaokeConfig.setLevel(karaoke.optFloat("level", karaokeConfig.getLevel()));
+            karaokeConfig.setMonoLevel(karaoke.optFloat("monoLevel", karaokeConfig.getMonoLevel()));
+            karaokeConfig.setFilterBand(karaoke.optFloat("filterBand", karaokeConfig.getFilterBand()));
+            karaokeConfig.setFilterWidth(karaoke.optFloat("filterWidth", karaokeConfig.getFilterWidth()));
         }
         if (json.has("lowpass")) {
             JSONObject lowPass = json.getJSONObject("lowpass");
             LowPassConfig lowPassConfig = filterChain.getLowPassConfig();
-            lowPassConfig.setSmoothing(lowPass.getFloat("smoothing"));
+            lowPassConfig.setSmoothing(lowPass.optFloat("smoothing", lowPassConfig.getSmoothing()));
         }
         if (json.has("rotation")) {
             JSONObject rotation = json.getJSONObject("rotation");
             RotationConfig rotationConfig = filterChain.getRotationConfig();
-            rotationConfig.setRotationHz(rotation.getFloat("rotationHz"));
+            rotationConfig.setRotationHz(rotation.optFloat("rotationHz", rotationConfig.getRotationHz()));
         }
         if (json.has("timescale")) {
             JSONObject timescale = json.getJSONObject("timescale");
             TimescaleConfig timescaleConfig = filterChain.getTimescaleConfig();
-            timescaleConfig.setSpeed(timescale.getFloat("speed"));
-            timescaleConfig.setPitch(timescale.getFloat("pitch"));
-            timescaleConfig.setRate(timescale.getFloat("rate"));
+            timescaleConfig.setSpeed(timescale.optFloat("speed", timescaleConfig.getSpeed()));
+            timescaleConfig.setPitch(timescale.optFloat("pitch", timescaleConfig.getPitch()));
+            timescaleConfig.setRate(timescale.optFloat("rate", timescaleConfig.getRate()));
         }
         if (json.has("tremolo")) {
             JSONObject tremolo = json.getJSONObject("tremolo");
             TremoloConfig tremoloConfig = filterChain.getTremoloConfig();
-            tremoloConfig.setFrequency(tremolo.getFloat("frequency"));
-            tremoloConfig.setDepth(tremolo.getFloat("depth"));
+            tremoloConfig.setFrequency(tremolo.optFloat("frequency", tremoloConfig.getFrequency()));
+            tremoloConfig.setDepth(tremolo.optFloat("depth", tremoloConfig.getDepth()));
         }
         if (json.has("vibrato")) {
             JSONObject vibrato = json.getJSONObject("vibrato");
             VibratoConfig vibratoConfig = filterChain.getVibratoConfig();
-            vibratoConfig.setFrequency(vibrato.getFloat("frequency"));
-            vibratoConfig.setDepth(vibrato.getFloat("depth"));
+            vibratoConfig.setFrequency(vibrato.optFloat("frequency", vibratoConfig.getFrequency()));
+            vibratoConfig.setDepth(vibrato.optFloat("depth", vibratoConfig.getDepth()));
         }
         if (json.has("volume")) {
             VolumeConfig volumeConfig = filterChain.getVolumeConfig();
-            volumeConfig.setVolume(json.getFloat("volume"));
+            volumeConfig.setVolume(json.optFloat("volume", volumeConfig.getVolume()));
         }
         filterChain.getPlayer().setFilterFactory(filterChain.factory());
     }

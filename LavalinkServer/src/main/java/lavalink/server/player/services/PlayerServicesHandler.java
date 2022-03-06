@@ -4,19 +4,21 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import lavalink.server.player.Player;
 import lavalink.server.player.services.sponsorblock.SponsorblockHandler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlayerServicesHandler {
     private final Player player;
 
     //Sponsorblock
-    private boolean sponsorBlock = false;
-    private List<String> sponsorBlockCategories;
+    private boolean sponsorblock = false;
+    private List<String> sponsorblockCategories = new ArrayList<>();
 
     public PlayerServicesHandler(Player player) {
         this.player = player;
@@ -26,38 +28,53 @@ public class PlayerServicesHandler {
         return this.player;
     }
 
-    public boolean isSponsorBlockEnabled() {
-        return this.sponsorBlock;
+    public boolean isSponsorblockEnabled() {
+        return this.sponsorblock;
     }
 
-    public void setSponsorBlock(boolean sponsorBlock) {
-        this.sponsorBlock = sponsorBlock;
+    public void setSponsorblock(boolean sponsorblock) {
+        this.sponsorblock = sponsorblock;
     }
 
-    public List<String> getSponsorBlockCategories() {
-        return this.sponsorBlockCategories;
+    public List<String> getSponsorblockCategories() {
+        return this.sponsorblockCategories;
     }
 
-    public void setSponsorBlockCategories(List<String> categories) {
-        this.sponsorBlockCategories = categories;
+    public void setSponsorblockCategories(List<String> categories) {
+        this.sponsorblockCategories = categories;
     }
 
     public JSONObject encode() {
         return new JSONObject()
         .put("sponsorblock", new JSONObject()
-            .put("enabled", this.sponsorBlock)
-            .put("categories", this.sponsorBlockCategories)
+            .put("enabled", this.sponsorblock)
+            .put("categories", this.sponsorblockCategories)
         );
     }
 
     public void handleTrackStart(AudioTrack track) {
         AudioSourceManager sourceManager = track.getSourceManager();
-        if (this.sponsorBlock && !this.sponsorBlockCategories.isEmpty() && (sourceManager != null && sourceManager.getSourceName().equals("youtube"))) {
+        if (this.sponsorblock && !this.sponsorblockCategories.isEmpty() && (sourceManager != null && sourceManager.getSourceName().equals("youtube"))) {
             SponsorblockHandler.handleTrack(track, this);
         }
     }
 
     public void handleTrackEnd(AudioTrack track, AudioTrackEndReason reason) {
         //Nothing for now...
+    }
+
+    public void parseJSON(JSONObject json) {
+        if (json.has("sponsorblock")) {
+            JSONObject sponsorblock = json.getJSONObject("sponsorblock");
+            this.sponsorblock = sponsorblock.optBoolean("enabled", false);
+            JSONArray jsonArr = sponsorblock.optJSONArray("categories");
+            List<Object> categories = jsonArr != null ? jsonArr.toList() : null;
+            if (categories != null && !categories.isEmpty()) {
+                this.sponsorblockCategories.clear();
+                for (Object o : categories) {
+                    this.sponsorblockCategories.add(o.toString());
+                }
+            }
+        }
     }
 }

@@ -56,17 +56,15 @@ dependencies {
         exclude group: "com.sedmelluq", module: "lavaplayer"
     }
 
-    implementation(group: 'com.github.WearifulCupid0', name: 'lavaplayer', version: lavaplayerVersion) {
-        force = true
-    }
+    implementation group: 'com.github.WearifulCupid0.lavaplayer', name: 'lavaplayer', version: lavaplayerVersion
+    implementation group: 'com.github.WearifulCupid0.lavaplayer', name: 'lavaplayer-ext-format-xm', version: lavaplayerVersion
+    implementation group: 'com.github.WearifulCupid0.lavaplayer', name: 'lavaplayer-ext-third-party-sources', version: lavaplayerVersion
+    implementation group: 'com.github.WearifulCupid0.lavaplayer', name: 'lavaplayer-ext-youtube-rotator', version: lavaplayerVersion
 
-    //compile group: 'com.sedmelluq', name: 'lavaplayer', version: lavaplayerVersion
-    implementation(group: 'com.sedmelluq', name: 'lavaplayer-ext-youtube-rotator', version: lavaplayerIpRotatorVersion) {
+    implementation(group: 'com.github.natanbc', name: 'lavadsp', version: lavaDspVersion) {
         exclude group: 'com.sedmelluq', module: 'lavaplayer'
     }
-    implementation(group: 'com.github.natanbc', name: 'lavadsp', version: lavaDspVersion) {
-        exclude group: "com.sedmelluq", module: "lavaplayer"
-    }
+    
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
 
     implementation group: 'org.springframework', name: 'spring-websocket', version: springWebSocketVersion

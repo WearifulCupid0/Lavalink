@@ -34,6 +34,7 @@ class WebSocketHandler(
         "volume" to ::volume,
         "filters" to ::filters,
         "destroy" to ::destroy,
+        "services" to ::services,
         "configureResuming" to ::configureResuming,
         "ping" to ::ping,
         "loadTracks" to ::loadTracks
@@ -94,6 +95,11 @@ class WebSocketHandler(
 
     private fun destroy(json: JSONObject) {
         context.destroyPlayer(json.getLong("guildId"))
+    }
+
+    private fun services(json: JSONObject) {
+        val player = context.getPlayer(json.getString("guildId"))
+        player.servicesHandler.parseJSON(json)
     }
 
     private fun configureResuming(json: JSONObject) {

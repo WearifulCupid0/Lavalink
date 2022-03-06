@@ -21,7 +21,6 @@ public class AudioSourcesConfig {
     private boolean yandex = true;
 
     //Remote
-    private boolean audioboom = true;
     private boolean bandcamp = true;
     private boolean bandlab = true;
     private boolean bilibili = true;
@@ -35,7 +34,6 @@ public class AudioSourcesConfig {
     private boolean ocremix = true;
     private boolean odysee = true;
     private boolean reddit = true;
-    private boolean smule = true;
     private boolean soundcloud = true;
     private boolean streamable = true;
     private boolean tiktok = true;
@@ -109,15 +107,6 @@ public class AudioSourcesConfig {
 
     public void setHttp(boolean http) {
         this.http = http;
-    }
-
-
-    public boolean isAudioboom() {
-        return audioboom;
-    }
-
-    public void setAudioboom(boolean audioboom) {
-        this.audioboom = audioboom;
     }
 
     public boolean isBandcamp() {
@@ -222,14 +211,6 @@ public class AudioSourcesConfig {
 
     public void setReddit(boolean reddit) {
         this.reddit = reddit;
-    }
-
-    public boolean isSmule() {
-        return smule;
-    }
-
-    public void setSmule(boolean smule) {
-        this.smule = smule;
     }
 
     public boolean isStreamable() {

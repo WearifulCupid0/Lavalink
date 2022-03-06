@@ -44,9 +44,6 @@ class PlayerFunHandlers(private val context: SocketContext) {
         }
 
         player.play(track)
-
-        val conn = context.getVoiceConnection(player)
-        context.getPlayer(player.getGuildId()).provideTo(conn)
     }
 
     public fun update(json: JSONObject, player: Player) {
@@ -56,6 +53,7 @@ class PlayerFunHandlers(private val context: SocketContext) {
         if (json.has("pause")) player.setPause(json.getBoolean("pause"))
         if (json.has("play")) play(json.getJSONObject("play"), player)
         if (json.has("voice")) voiceUpdate(json.getJSONObject("voice"), player)
+        if (json.has("services")) player.getServicesHandler().parseJSON(json.getJSONObject("services"))
     }
 
     public fun voiceUpdate(json: JSONObject, player: Player) {
