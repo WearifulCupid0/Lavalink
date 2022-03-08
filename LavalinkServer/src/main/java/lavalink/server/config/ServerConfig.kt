@@ -33,6 +33,7 @@ class ServerConfig {
     var password: String? = null
     @get:Deprecated("use {@link SentryConfigProperties} instead.")
     var sentryDsn = ""
+    var nonAllocatingBuffer: Boolean = true
     var bufferDurationMs: Int? = null
     var frameBufferDurationMs: Int? = null
     var youtubePlaylistLoadLimit: Int? = null

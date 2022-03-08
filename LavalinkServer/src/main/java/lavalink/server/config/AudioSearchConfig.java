@@ -22,6 +22,7 @@ public class AudioSearchConfig {
     private boolean mixcloud = true;
     private boolean odysee = true;
     private boolean soundcloud = true;
+    private boolean vimeo = true;
     private boolean youtube = true;
 
     public boolean isApplemusic() {
@@ -120,6 +121,14 @@ public class AudioSearchConfig {
 
     public void setSoundcloud(boolean soundcloud) {
         this.soundcloud = soundcloud;
+    }
+
+    public boolean isVimeo() {
+        return vimeo;
+    }
+
+    public void setVimeo(boolean vimeo) {
+        this.vimeo = vimeo;
     }
 
     public boolean isYoutube() {

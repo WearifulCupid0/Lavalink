@@ -27,7 +27,6 @@ public class AudioSourcesConfig {
     private boolean clyp = true;
     private boolean getyarn = true;
     private boolean iheart = true;
-    private boolean instagram = true;
     private boolean jamendo = true;
     private boolean mixcloud = true;
     private boolean newgrounds = true;
@@ -155,14 +154,6 @@ public class AudioSourcesConfig {
 
     public void setIheart(boolean iheart) {
         this.iheart = iheart;
-    }
-
-    public boolean isInstagram() {
-        return instagram;
-    }
-
-    public void setInstagram(boolean instagram) {
-        this.instagram = instagram;
     }
 
     public boolean isJamendo() {

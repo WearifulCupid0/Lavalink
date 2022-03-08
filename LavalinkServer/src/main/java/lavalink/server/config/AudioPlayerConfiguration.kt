@@ -18,7 +18,6 @@ import com.sedmelluq.discord.lavaplayer.source.clyp.ClypAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.getyarn.GetyarnAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.iheart.iHeartAudioSourceManager
-import com.sedmelluq.discord.lavaplayer.source.instagram.InstagramAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.mixcloud.MixcloudAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.jamendo.JamendoAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.newgrounds.NewgroundsAudioSourceManager
@@ -34,6 +33,7 @@ import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceMan
 import com.sedmelluq.discord.lavaplayer.source.twitter.TwitterAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.track.playback.NonAllocatingAudioFrameBuffer
 import com.sedmelluq.lavaplayer.extensions.format.xm.XmContainerProbe
 import com.sedmelluq.lava.extensions.youtuberotator.YoutubeIpRotatorSetup
 import com.sedmelluq.lava.extensions.youtuberotator.planner.*
@@ -68,10 +68,16 @@ class AudioPlayerConfiguration {
         audioSourceManagers: Collection<AudioSourceManager>,
         audioPlayerManagerConfigurations: Collection<AudioPlayerManagerConfiguration>
     ): AudioPlayerManager {
-        val audioPlayerManager = DefaultAudioPlayerManager()
+        var audioPlayerManager: AudioPlayerManager = DefaultAudioPlayerManager()
 
         if (serverConfig.isGcWarnings) {
             audioPlayerManager.enableGcMonitoring()
+        }
+
+        audioPlayerManager.configuration.isFilterHotSwapEnabled = true
+        if (serverConfig.nonAllocatingBuffer) {
+            log.info("Using non-allocating audio frame buffer.")
+            audioPlayerManager.configuration.setFrameBufferFactory(::NonAllocatingAudioFrameBuffer)
         }
 
         val defaultFrameBufferDuration = audioPlayerManager.frameBufferDuration
@@ -122,7 +128,6 @@ class AudioPlayerConfiguration {
         if (sources.isClyp) audioPlayerManager.registerSourceManager(ClypAudioSourceManager())
         if (sources.isGetyarn) audioPlayerManager.registerSourceManager(GetyarnAudioSourceManager())
         if (sources.isIheart) audioPlayerManager.registerSourceManager(iHeartAudioSourceManager(search.isIheart))
-        if (sources.isInstagram) audioPlayerManager.registerSourceManager(InstagramAudioSourceManager())
         if (sources.isJamendo) audioPlayerManager.registerSourceManager(JamendoAudioSourceManager(search.isJamendo))
         if (sources.isMixcloud) audioPlayerManager.registerSourceManager(MixcloudAudioSourceManager(search.isMixcloud))
         if (sources.isNewgrounds) audioPlayerManager.registerSourceManager(NewgroundsAudioSourceManager())
@@ -134,7 +139,7 @@ class AudioPlayerConfiguration {
         if (sources.isTunein) audioPlayerManager.registerSourceManager(TuneinAudioSourceManager())
         if (sources.isTwitch) audioPlayerManager.registerSourceManager(TwitchStreamAudioSourceManager())
         if (sources.isTwitter) audioPlayerManager.registerSourceManager(TwitterAudioSourceManager())
-        if (sources.isVimeo) audioPlayerManager.registerSourceManager(VimeoAudioSourceManager())
+        if (sources.isVimeo) audioPlayerManager.registerSourceManager(VimeoAudioSourceManager(search.isVimeo))
         if (sources.isLocal) audioPlayerManager.registerSourceManager(LocalAudioSourceManager())
 
         if (sources.isApplemusic) audioPlayerManager.registerSourceManager(AppleMusicAudioSourceManager(search.isApplemusic, audioPlayerManager))
@@ -177,12 +182,8 @@ class AudioPlayerConfiguration {
             log.info("Registered {} provided from a plugin", it)
         }
 
-        audioPlayerManager.configuration.isFilterHotSwapEnabled = true
-
-        var am: AudioPlayerManager = audioPlayerManager
-
         audioPlayerManagerConfigurations.forEach {
-            am = it.configure(am)
+            audioPlayerManager = it.configure(audioPlayerManager)
         }
 
         // This must be loaded last
@@ -212,7 +213,7 @@ class AudioPlayerConfiguration {
             audioPlayerManager.registerSourceManager(http)
         }
 
-        return am
+        return audioPlayerManager
     }
 
     @Bean
@@ -248,5 +249,4 @@ class AudioPlayerConfiguration {
             else -> throw RuntimeException("Unknown strategy!")
         }
     }
-
 }

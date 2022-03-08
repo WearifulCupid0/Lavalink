@@ -14,7 +14,7 @@ sourceCompatibility = targetCompatibility = 8
 
 dependencies {
     implementation group: 'org.springframework.boot', name: "spring-boot", version: springBootVersion
-    implementation group: 'com.github.WearifulCupid0', name: 'lavaplayer', version: lavaplayerVersion
+    implementation group: 'com.github.WearifulCupid0.lavaplayer', name: 'lavaplayer', version: lavaplayerVersion
     implementation group: 'org.json', name: 'json', version: jsonOrgVersion
 }
 
