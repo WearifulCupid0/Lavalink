@@ -50,7 +50,7 @@ lavalink:
     bufferDurationMs: 400 # The duration of the NAS buffer. Higher values fare better against longer GC pauses
     frameBufferDurationMs: 5000 # How many milliseconds of audio to keep buffered
     playerUpdateInterval: 5 # How frequently to send player updates to clients, in seconds
-    defaultArtwork: "..." # A default value if the artworkUrl info is null or empty.
+    defaultArtwork: "..." # A default value if the artworkUrl info is null or empty. not added yet....
     gc-warnings: true
     nonAllocatingBuffer: true
     #yandexConfig: # Optional, but good if you want native audio playing from Yandex Music.
