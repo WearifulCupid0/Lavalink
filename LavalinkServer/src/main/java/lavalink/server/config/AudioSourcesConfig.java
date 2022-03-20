@@ -29,11 +29,11 @@ public class AudioSourcesConfig {
     private boolean iheart = true;
     private boolean jamendo = true;
     private boolean mixcloud = true;
-    private boolean newgrounds = true;
     private boolean ocremix = true;
     private boolean odysee = true;
     private boolean reddit = true;
     private boolean soundcloud = true;
+    private boolean soundgasm = true;
     private boolean streamable = true;
     private boolean tiktok = true;
     private boolean tunein = true;
@@ -172,14 +172,6 @@ public class AudioSourcesConfig {
         this.mixcloud = mixcloud;
     }
 
-    public boolean isNewgrounds() {
-        return newgrounds;
-    }
-
-    public void setNewgrounds(boolean newgrounds) {
-        this.newgrounds = newgrounds;
-    }
-
     public boolean isOcremix() {
         return ocremix;
     }
@@ -202,6 +194,14 @@ public class AudioSourcesConfig {
 
     public void setReddit(boolean reddit) {
         this.reddit = reddit;
+    }
+
+    public boolean isSoundgasm() {
+        return soundgasm;
+    }
+
+    public void setSoundgasm(boolean soundgasm) {
+        this.soundgasm = soundgasm;
     }
 
     public boolean isStreamable() {

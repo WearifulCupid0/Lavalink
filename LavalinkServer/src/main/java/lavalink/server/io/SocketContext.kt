@@ -281,7 +281,7 @@ class SocketContext(
             out.put("op", "event")
             out.put("event", "VoiceConnectionClosed")
             out.put("guildId", player.guildId.toString())
-            out.put("reason", reason ?: "")
+            out.put("reason", reason ?: JSONObject.NULL)
             out.put("code", code)
             out.put("byRemote", byRemote)
 
@@ -290,16 +290,13 @@ class SocketContext(
             SocketServer.sendPlayerUpdate(this@SocketContext, player)
         }
 
-        override fun gatewayReady(target: InetSocketAddress?, ssrc: Int) {
+        override fun gatewayReady(target: InetSocketAddress, ssrc: Int) {
             val out = JSONObject()
             out.put("op", "event")
             out.put("event", "VoiceConnectionReady")
             out.put("guildId", player.guildId.toString())
             out.put("ssrc", ssrc)
-            
-            if (target != null) {
-                out.put("address", target.getAddress().toString())
-            }
+            out.put("address", target.getAddress().toString())
 
             send(out)
 
@@ -311,6 +308,51 @@ class SocketContext(
             out.put("op", "event")
             out.put("event", "VoiceConnectionResumed")
             out.put("guildId", player.guildId.toString())
+
+            send(out)
+
+            SocketServer.sendPlayerUpdate(this@SocketContext, player)
+        }
+
+        override fun userConnected(id: String, audioSSRC: Int, videoSSRC: Int, rtxSSRC: Int) {
+            val out = JSONObject()
+            out.put("op", "event")
+            out.put("event", "VoiceUserConnected")
+            out.put("guildId", player.guildId.toString())
+            out.put("userId", id)
+            out.put("audioSSRC", audioSSRC)
+            out.put("videoSSRC", videoSSRC)
+            out.put("rtxSSRC", rtxSSRC)
+
+            send(out)
+        }
+
+        override fun userDisconnected(id: String) {
+            val out = JSONObject()
+            out.put("op", "event")
+            out.put("event", "VoiceUserDisconnected")
+            out.put("guildId", player.guildId.toString())
+            out.put("userId", id)
+
+            send(out)
+        }
+
+        override fun externalIPDiscovered(target: InetSocketAddress) {
+            val out = JSONObject()
+            out.put("op", "event")
+            out.put("event", "VoiceExternalIpDiscovered")
+            out.put("guildId", player.guildId.toString())
+            out.put("address", target.getAddress().toString())
+
+            send(out)
+        }
+
+        override fun sessionDescription(session: JsonObject) {
+            val out = JSONObject()
+            out.put("op", "event")
+            out.put("event", "VoiceSessionDescription")
+            out.put("guildId", player.guildId.toString())
+            out.put("session", JSONObject(session.toString()))
 
             send(out)
         }

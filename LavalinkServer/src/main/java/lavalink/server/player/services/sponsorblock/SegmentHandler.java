@@ -38,7 +38,7 @@ public class SegmentHandler implements TrackMarkerHandler {
         track.setPosition(segment.getEndTime());
         JSONObject json = new JSONObject()
             .put("op", "event")
-            .put("event", "TrackSegmentSkipped")
+            .put("event", "SponsorblockSegmentSkipped")
             .put("guildId", this.player.getGuildId())
             .put("segment", segment.encode());
 

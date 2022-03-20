@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 public class FilterChain {
     private final ChannelMixConfig channelMixConfig = new ChannelMixConfig();
     private final DistortionConfig distortionConfig = new DistortionConfig();
+    private final EchoConfig echoConfig = new EchoConfig();
     private final EqualizerConfig equalizerConfig = new EqualizerConfig();
     private final KaraokeConfig karaokeConfig = new KaraokeConfig();
     private final LowPassConfig lowPassConfig = new LowPassConfig();
@@ -36,6 +37,7 @@ public class FilterChain {
     public FilterChain(AudioPlayer player) {
         filters.put(channelMixConfig.getClass(), channelMixConfig);
         filters.put(distortionConfig.getClass(), distortionConfig);
+        filters.put(echoConfig.getClass(), echoConfig);
         filters.put(equalizerConfig.getClass(), equalizerConfig);
         filters.put(karaokeConfig.getClass(), karaokeConfig);
         filters.put(lowPassConfig.getClass(), lowPassConfig);
@@ -101,6 +103,10 @@ public class FilterChain {
 
     public DistortionConfig getDistortionConfig() {
         return distortionConfig;
+    }
+
+    public EchoConfig getEchoConfig() {
+        return echoConfig;
     }
 
     public EqualizerConfig getEqualizerConfig() {
@@ -178,6 +184,12 @@ public class FilterChain {
             distortionConfig.setTanScale(distortion.optFloat("tanScale", distortionConfig.getTanScale()));
             distortionConfig.setOffset(distortion.optFloat("offset", distortionConfig.getOffset()));
             distortionConfig.setScale(distortion.optFloat("scale", distortionConfig.getScale()));
+        }
+        if (json.has("echo")) {
+            JSONObject echo = json.getJSONObject("echo");
+            EchoConfig echoConfig = filterChain.getEchoConfig();
+            echoConfig.setDecay(echo.optFloat("decay", echoConfig.getDecay()));
+            echoConfig.setDelay(echo.optDouble("delay", echoConfig.getDelay()));
         }
         if (json.has("equalizer")) {
             JSONArray array = json.getJSONObject("equalizer").getJSONArray("bands");

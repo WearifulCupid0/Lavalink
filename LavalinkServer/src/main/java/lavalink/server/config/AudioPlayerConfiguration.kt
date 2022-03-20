@@ -20,12 +20,12 @@ import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.iheart.iHeartAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.mixcloud.MixcloudAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.jamendo.JamendoAudioSourceManager
-import com.sedmelluq.discord.lavaplayer.source.newgrounds.NewgroundsAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.ocremix.OcremixAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.odysee.OdyseeAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.reddit.RedditAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.local.LocalAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.*
+import com.sedmelluq.discord.lavaplayer.source.soundgasm.SoundgasmAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.streamable.StreamableAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.tiktok.TiktokAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.tunein.TuneinAudioSourceManager
@@ -130,10 +130,10 @@ class AudioPlayerConfiguration {
         if (sources.isIheart) audioPlayerManager.registerSourceManager(iHeartAudioSourceManager(search.isIheart))
         if (sources.isJamendo) audioPlayerManager.registerSourceManager(JamendoAudioSourceManager(search.isJamendo))
         if (sources.isMixcloud) audioPlayerManager.registerSourceManager(MixcloudAudioSourceManager(search.isMixcloud))
-        if (sources.isNewgrounds) audioPlayerManager.registerSourceManager(NewgroundsAudioSourceManager())
         if (sources.isOcremix) audioPlayerManager.registerSourceManager(OcremixAudioSourceManager())
         if (sources.isOdysee) audioPlayerManager.registerSourceManager(OdyseeAudioSourceManager(search.isOdysee))
         if (sources.isReddit) audioPlayerManager.registerSourceManager(RedditAudioSourceManager())
+        if (sources.isSoundgasm) audioPlayerManager.registerSourceManager(SoundgasmAudioSourceManager())
         if (sources.isStreamable) audioPlayerManager.registerSourceManager(StreamableAudioSourceManager())
         if (sources.isTiktok) audioPlayerManager.registerSourceManager(TiktokAudioSourceManager())
         if (sources.isTunein) audioPlayerManager.registerSourceManager(TuneinAudioSourceManager())

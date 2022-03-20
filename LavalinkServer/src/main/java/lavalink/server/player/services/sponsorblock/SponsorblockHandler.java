@@ -64,7 +64,7 @@ public class SponsorblockHandler {
             if (!segments.isEmpty()) {
                 JSONObject json = new JSONObject()
                         .put("op", "event")
-                        .put("event", "TrackSegmentLoaded")
+                        .put("event", "SponsorblockSegmentLoaded")
                         .put("guildId", servicesHandler.getPlayer().getGuildId())
                         .put("segments",
                                 new JSONArray(segments.stream().map(Segment::encode).collect(Collectors.toList())));
@@ -82,7 +82,7 @@ public class SponsorblockHandler {
         } catch (FriendlyException err) {
             JSONObject out = new JSONObject()
                     .put("op", "event")
-                    .put("event", "TrackSegmentFailed")
+                    .put("event", "SponsorblockSegmentFailed")
                     .put("guildId", servicesHandler.getPlayer().getGuildId());
 
             try {
