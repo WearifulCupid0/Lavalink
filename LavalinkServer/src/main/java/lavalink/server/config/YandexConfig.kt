@@ -1,10 +1,10 @@
 package lavalink.server.config
 
-class YandexConfig {
-    var token = ""
-    var proxyHost = ""
-    var proxyPort = 8080
-    var proxyLogin = ""
-    var proxyPass = ""
-    var proxyTimeout = 10000
-}
+data class YandexConfig (
+    var token: String = "",
+    var proxyHost: String = "",
+    var proxyPort: Int = 8080,
+    var proxyLogin: String = "",
+    var proxyPass: String = "",
+    var proxyTimeout: Int = 10000
+)

@@ -1,0 +1,93 @@
+server: # REST and WS server
+  port: 2333
+  address: 0.0.0.0
+lavalink:
+  server:
+    password: "youshallnotpass"
+    sources:
+      youtube: true
+      bandcamp: true
+      soundcloud: true
+      twitch: true
+      vimeo: true
+      http: true
+      local: false
+      applemusic: true #Search on YouTube to work.
+      deezer: true #Search on YouTube to work.
+      napster: true #Search on YouTube to work.
+      spotify: true #Search on YouTube to work.
+      tidal: true #Search on YouTube to work.
+      yandex: true #Need extra config to work.
+      twitter: true
+      tunein: true
+      tiktok: true
+      streamable: true
+      soundgasm: true
+      reddit: true
+      odysee: true
+      ocremix: true
+      mixcloud: true
+      jamendo: true
+      iheart: true
+      getyarn: true
+      clyp: true
+      bilibili: true
+    search:
+      applemusic: true #Search on YouTube to work.
+      deezer: true #Search on YouTube to work.
+      napster: true #Search on YouTube to work.
+      spotify: true #Search on YouTube to work.
+      tidal: true #Search on YouTube to work. 
+      yandex: true #Need extra config to work.
+      bilibili: true
+      iheart: true
+      jamendo: true
+      mixcloud: true
+      odysee: true
+      soundcloud: true
+      vimeo: true
+      youtube: true
+    bufferDurationMs: 400 # The duration of the NAS buffer. Higher values fare better against longer GC pauses
+    frameBufferDurationMs: 5000 # How many milliseconds of audio to keep buffered
+    playerUpdateInterval: 5 # How frequently to send player updates to clients, in seconds
+    defaultArtwork: "..." # A default value if the artworkUrl info is null or empty.
+    gc-warnings: true
+    nonAllocatingBuffer: true
+    #yandexConfig: Optional, but good if you want native audio playing from Yandex Music.
+      #token: "..." OAuth2 Token for Yandex Music API requests
+      #proxyHost: "..."
+      #proxyPort: 8080
+      #proxyLogin: "..."
+      #proxyPass: "..."
+      #proxyTimeout: 10000
+    #youtubeConfig: Optional, but good if you don't want age verification errors.
+      #email: "..."
+      #password: "..."
+    #ratelimit:
+      #ipBlocks: ["1.0.0.0/8", "..."] # list of ip blocks
+      #excludedIps: ["...", "..."] # ips which should be explicit excluded from usage by lavalink
+      #strategy: "RotateOnBan" # RotateOnBan | LoadBalance | NanoSwitch | RotatingNanoSwitch
+      #searchTriggersFail: true # Whether a search 429 should trigger marking the ip as failing
+      #retryLimit: -1 # -1 = use default lavaplayer value | 0 = infinity | >0 = retry will happen this numbers times
+
+metrics:
+  prometheus:
+    enabled: false
+    endpoint: /metrics
+
+sentry:
+  dsn: ""
+  environment: ""
+#  tags:
+#    some_key: some_value
+#    another_key: another_value
+
+logging:
+  file:
+    max-history: 30
+    max-size: 1GB
+  path: ./logs/
+
+  level:
+    root: INFO
+    lavalink: INFO
